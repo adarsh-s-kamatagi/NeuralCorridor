@@ -76,10 +76,15 @@
 
     <div class="controls">
       <label for="node-slider">Graph size (nodes): <span id="node-count-display">512</span></label>
-      <input type="range" id="node-slider" min="64" max="4096" step="64" value="512" />
+      <input type="range" id="node-slider" min="64" max="50000" step="64" value="512" />
       <button class="run-btn" id="run-btn">Run CPU vs GPU benchmark</button>
     </div>
 
+    <div class="controls">
+  <button class="run-btn" id="check-btn" style="background: var(--gold);">Check GPU feasibility first</button>
+</div>
+<div id="feasibility-result" style="margin: 12px 0;"></div>
+    
     <h2>4. Live log</h2>
     <div id="log">Waiting to start…</div>
 
