@@ -282,3 +282,126 @@ runBtn.addEventListener("click", async () => {
 });
 
 detectEnvironment();
+// ---------------------------------------------------------------------------
+// Preflight GPU feasibility check — predicts whether a given graph size
+// will fit in a single WebGPU buffer BEFORE actually running inference.
+//
+// Key fact: WebGPU deliberately does not expose total VRAM (privacy), but
+// it DOES expose maxBufferSize / maxStorageBufferBindingSize — hard caps
+// on how large a single buffer allocation is allowed to be, regardless of
+// how much VRAM the GPU actually has. Our adjacency matrix (N x N floats)
+// has to live in one buffer, so this limit is what actually matters here.
+// ---------------------------------------------------------------------------
+
+function formatBytes(bytes) {
+  if (bytes >= 1e9) return (bytes / 1e9).toFixed(2) + " GB";
+  if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + " MB";
+  return (bytes / 1e3).toFixed(0) + " KB";
+}
+
+async function checkGpuFeasibility(n, featureDim) {
+  const resultEl = document.getElementById("feasibility-result");
+  resultEl.innerHTML = '<p style="color: var(--ink-faint); font-family: var(--font-mono); font-size: 13px;">Checking...</p>';
+
+  if (!navigator.gpu) {
+    resultEl.innerHTML = renderVerdict("no", "WebGPU not available in this browser — can't check GPU feasibility.", []);
+    return;
+  }
+
+  const adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) {
+    resultEl.innerHTML = renderVerdict("no", "No WebGPU adapter found — can't check GPU feasibility.", []);
+    return;
+  }
+
+  const limits = adapter.limits;
+  const bytesA = n * n * 4;           // adjacency matrix: N x N floats
+  const bytesX = n * featureDim * 4;  // feature matrix: N x featureDim floats
+
+  const rows = [
+    { label: "Adjacency matrix (A)", need: bytesA },
+    { label: "Feature matrix (X)", need: bytesX },
+  ];
+
+  const maxBuffer = limits.maxBufferSize;
+  const maxBinding = limits.maxStorageBufferBindingSize;
+  const hardLimit = Math.min(maxBuffer, maxBinding);
+
+  let verdict = "ok";
+  let reasons = [];
+
+  rows.forEach((r) => {
+    r.limit = hardLimit;
+    r.fits = r.need <= hardLimit;
+    if (!r.fits) {
+      verdict = "no";
+      reasons.push(`${r.label} needs ${formatBytes(r.need)}, exceeding the browser's ${formatBytes(hardLimit)} single-buffer limit.`);
+    }
+  });
+
+  // Even if it technically fits the buffer-size limit, warn if it's using
+  // a large fraction of it (actual free VRAM could still be exceeded —
+  // this we genuinely cannot know in advance from JS).
+  if (verdict === "ok") {
+    const worstFraction = Math.max(bytesA, bytesX) / hardLimit;
+    if (worstFraction > 0.5) {
+      verdict = "risky";
+      reasons.push(`Uses ${(worstFraction * 100).toFixed(0)}% of the browser's max buffer size — likely to work, but real available VRAM (which JS can't query) could still cause it to fail. Try it, but don't be surprised if it does.`);
+    } else {
+      reasons.push(`Comfortably within limits (using ${(worstFraction * 100).toFixed(1)}% of the max buffer size).`);
+    }
+  }
+
+  let html = renderVerdict(verdict, null, rows, hardLimit, reasons);
+  resultEl.innerHTML = html;
+
+  // Optional: actually attempt a real buffer allocation as a stronger test
+  // than just comparing numbers - catches real-world limits the reported
+  // numbers might not reflect.
+  try {
+    const device = await adapter.requestDevice();
+    const testBuffer = device.createBuffer({
+      size: bytesA,
+      usage: GPUBufferUsage.STORAGE,
+    });
+    testBuffer.destroy();
+    resultEl.innerHTML += '<p style="color: var(--good); font-family: var(--font-mono); font-size: 13px; margin-top: 8px;">✓ Real allocation test: the browser accepted a buffer of this size (does not guarantee the full model run will succeed, but is a good sign).</p>';
+  } catch (e) {
+    resultEl.innerHTML += `<p style="color: var(--bad); font-family: var(--font-mono); font-size: 13px; margin-top: 8px;">✗ Real allocation test failed: ${e.message}</p>`;
+  }
+}
+
+function renderVerdict(verdict, forcedMessage, rows, hardLimit, reasons) {
+  const labels = { ok: "LIKELY TO WORK", risky: "RISKY", no: "WILL LIKELY FAIL" };
+  const colors = { ok: "var(--good)", risky: "var(--gold)", no: "var(--bad)" };
+
+  let html = `<div style="border: 1px solid ${colors[verdict]}; border-radius: 4px; padding: 14px 16px;">
+    <div style="font-family: var(--font-mono); font-weight: 700; color: ${colors[verdict]}; margin-bottom: 8px;">${labels[verdict]}</div>`;
+
+  if (forcedMessage) {
+    html += `<div style="font-size: 14px; color: var(--ink-soft);">${forcedMessage}</div>`;
+  } else {
+    html += `<table style="width: 100%; font-family: var(--font-mono); font-size: 13px; border-collapse: collapse; margin-bottom: 8px;">
+      <tr style="color: var(--ink-faint);"><td>Tensor</td><td>Size needed</td><td>Browser's max buffer</td><td>Fits?</td></tr>`;
+    rows.forEach((r) => {
+      html += `<tr>
+        <td>${r.label}</td>
+        <td>${formatBytes(r.need)}</td>
+        <td>${formatBytes(r.limit)}</td>
+        <td style="color: ${r.fits ? "var(--good)" : "var(--bad)"};">${r.fits ? "yes" : "NO"}</td>
+      </tr>`;
+    });
+    html += "</table>";
+    reasons.forEach((r) => {
+      html += `<div style="font-size: 13px; color: var(--ink-soft);">• ${r}</div>`;
+    });
+  }
+  html += "</div>";
+  return html;
+}
+
+document.getElementById("check-btn").addEventListener("click", () => {
+  const n = parseInt(document.getElementById("node-slider").value, 10);
+  const f = 34; // match your model's feature dimension
+  checkGpuFeasibility(n, f);
+});
