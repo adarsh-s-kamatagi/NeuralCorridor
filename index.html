@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Browser GNN Compute Trial — CPU vs GPU</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- ONNX Runtime Web: runs ONNX models (the standard export format for PyTorch
+       models) directly in the browser, with a CPU backend (WASM) and a GPU
+       backend (WebGPU) -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
+</head>
+<body>
+
+  <div class="wrap">
+    <header>
+      <h1>Browser GNN Compute Trial</h1>
+      <p class="subtitle">Testing whether this browser can run graph neural network math on CPU and GPU — before building anything bigger.</p>
+    </header>
+
+    <h2>1. Environment check</h2>
+    <div class="status-list" id="env-status">
+      <div class="status-row">
+        <span class="status-label">CPU logical cores</span>
+        <span class="status-value" id="cpu-cores">checking…</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">WebAssembly SIMD</span>
+        <span class="badge pending" id="wasm-simd-badge">checking</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">WebGPU support</span>
+        <span class="badge pending" id="webgpu-badge">checking</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">GPU adapter</span>
+        <span class="status-value" id="gpu-adapter">checking…</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">ONNX Runtime Web</span>
+        <span class="badge pending" id="ort-badge">checking</span>
+      </div>
+    </div>
+
+    <h2>2. The model — a real trained GCN</h2>
+    <p style="color: var(--ink-soft); font-size: 15.5px;">
+      This isn't random weights. It's a 2-layer graph convolutional network,
+      trained (via hand-written numpy forward/backward passes — no PyTorch
+      needed for this small a model) on <strong>Zachary's Karate Club</strong>:
+      a real social network of 34 club members, famous in graph theory
+      because the club actually split into two factions. Shown the true
+      faction for just <strong>2 of the 34 members</strong>, the model
+      predicts all 34 correctly <span id="train-accuracy">97.1%</span> of the
+      time — learning purely from the graph structure. Exported to ONNX
+      (the format <code>torch.onnx.export()</code> produces from a real
+      PyTorch model), so this is a faithful test of the actual deployment
+      pipeline.
+    </p>
+    <div class="controls">
+      <button class="run-btn" id="classify-btn">Run real classification (CPU)</button>
+      <button class="run-btn" id="classify-btn-gpu">Run real classification (GPU)</button>
+    </div>
+    <div id="classify-results" style="margin-top: 12px;"></div>
+
+    <h2>3. Scalability stress test</h2>
+    <p style="color: var(--ink-soft); font-size: 15.5px;">
+      The trained model above only has 34 nodes to work with — too small to
+      show a real CPU/GPU gap. This section runs the <em>same two-layer GCN
+      architecture</em> (same math, freshly randomized larger graphs) at
+      sizes you control, purely to compare raw compute speed.
+    </p>
+
+    <div class="controls">
+      <label for="node-slider">Graph size (nodes): <span id="node-count-display">512</span></label>
+      <input type="range" id="node-slider" min="64" max="4096" step="64" value="512" />
+      <button class="run-btn" id="run-btn">Run CPU vs GPU benchmark</button>
+    </div>
+
+    <h2>4. Live log</h2>
+    <div id="log">Waiting to start…</div>
+
+    <h2>5. Benchmark results</h2>
+    <div class="result-grid">
+      <div class="result-card">
+        <h3>CPU (WASM)</h3>
+        <div class="result-time" id="cpu-time">—</div>
+        <div class="result-sub" id="cpu-sub">not run yet</div>
+      </div>
+      <div class="result-card">
+        <h3>GPU (WebGPU)</h3>
+        <div class="result-time" id="gpu-time">—</div>
+        <div class="result-sub" id="gpu-sub">not run yet</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
