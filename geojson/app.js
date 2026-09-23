@@ -54,6 +54,16 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
+// In a flex/CSS layout like this one, Leaflet can sometimes measure its
+// container before the layout has finished settling, which leaves the map
+// blank. Force a re-measure a few times early on, and again on resize.
+setTimeout(() => map.invalidateSize(), 0);
+window.addEventListener("load", () => map.invalidateSize());
+window.addEventListener("resize", () => map.invalidateSize());
+if (window.ResizeObserver) {
+  new ResizeObserver(() => map.invalidateSize()).observe(document.querySelector(".map-pane"));
+}
+
 map.pm.addControls({
   position: "topleft",
   drawMarker: true,
