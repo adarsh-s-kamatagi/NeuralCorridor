@@ -27,6 +27,9 @@ html, body.editor-body {
 
 .topbar .site-nav { padding: 0; }
 
+.topbar-actions { display: flex; gap: 8px; }
+.topbar-actions .run-btn { padding: 7px 12px; font-size: 12px; }
+
 #current-file-badge {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -158,7 +161,10 @@ html, body.editor-body {
 .file-row:last-child { border-bottom: none; }
 .file-row:hover { background: var(--bg-raised); color: var(--ink); }
 .file-row.selected { background: var(--accent-soft); color: var(--ink); }
-.file-row .file-path { color: var(--ink-faint); font-size: 10.5px; }
+.file-row .file-path { color: var(--ink-faint); font-size: 10.5px; margin-left: 22px; }
+
+.file-row-main { display: flex; align-items: center; gap: 8px; }
+.file-row-main input[type="checkbox"] { cursor: pointer; flex: 0 0 auto; }
 
 .upload-drop {
   border: 1px dashed var(--rule);
