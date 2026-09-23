@@ -27,6 +27,19 @@ function setBadge(name, count) {
     : "No file loaded yet.";
 }
 
+// Shared base styles, keyed by geometry type — used for both loaded
+// GeoJSON and shapes drawn with the toolbar, so everything looks the same
+// and can be dimmed/restored consistently in focus mode.
+const POINT_STYLE = { radius: 5, color: "#7a1f14", weight: 1, fillColor: "#d1392a", fillOpacity: 0.9 };
+const LINE_STYLE = { color: "#2a4b9b", weight: 3, opacity: 0.9 };
+const POLY_STYLE = { color: "#2a4b9b", weight: 2, opacity: 0.9, fillColor: "#2a4b9b", fillOpacity: 0.15 };
+
+function styleForType(geomType) {
+  if (geomType === "Point" || geomType === "MultiPoint") return { ...POINT_STYLE };
+  if (geomType === "LineString" || geomType === "MultiLineString") return { ...LINE_STYLE };
+  return { ...POLY_STYLE }; // Polygon, MultiPolygon, Rectangle, etc.
+}
+
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -83,41 +96,81 @@ map.pm.addControls({
 let editLayer = L.featureGroup().addTo(map);
 let selectedLayer = null;
 let currentFilename = "edited.geojson";
+let focusMode = false;
+
+const mapEl = document.getElementById("map");
+document.getElementById("focus-toggle").addEventListener("change", (e) => {
+  focusMode = e.target.checked;
+  updateFocusVisuals();
+});
 
 function clearMap() {
   editLayer.clearLayers();
   selectedLayer = null;
   renderPropsPanel(null);
+  updateFocusVisuals();
 }
 
 function bindFeatureInteractions(layer) {
   if (!layer.feature) layer.feature = { type: "Feature", properties: {} };
   if (!layer.feature.properties) layer.feature.properties = {};
-  layer.on("click", () => selectFeature(layer));
+  layer.on("click", (e) => {
+    L.DomEvent.stop(e); // don't let it bubble to the map's own click (deselect) handler
+    selectFeature(layer);
+  });
 }
 
 function selectFeature(layer) {
   selectedLayer = layer;
   renderPropsPanel(layer);
+  updateFocusVisuals();
+}
+
+// Clicking empty map background clears the selection (feature clicks stop
+// propagation above, so this only fires for genuine background clicks).
+map.on("click", () => {
+  if (selectedLayer) selectFeature(null);
+});
+
+// Dim every non-selected shape (and the basemap) so the selected feature
+// stands out, without literally blurring anything.
+function updateFocusVisuals() {
+  const active = focusMode && !!selectedLayer;
+  mapEl.classList.toggle("map-focus", active);
+
+  editLayer.eachLayer((lyr) => {
+    if (!lyr._baseStyle) return;
+    if (!active) {
+      lyr.setStyle(lyr._baseStyle);
+      return;
+    }
+    if (lyr === selectedLayer) {
+      lyr.setStyle({ ...lyr._baseStyle, color: "#b08b2e", opacity: 1, fillOpacity: Math.max(lyr._baseStyle.fillOpacity || 0, 0.55), weight: (lyr._baseStyle.weight || 2) + 2 });
+      if (lyr.bringToFront) lyr.bringToFront();
+    } else {
+      lyr.setStyle({ opacity: 0.12, fillOpacity: 0.05 });
+    }
+  });
 }
 
 // New shapes drawn with the toolbar
 map.on("pm:create", (e) => {
   let layer = e.layer;
 
-  // Match newly-drawn points to the same small red dot style used for
-  // loaded data, instead of Leaflet's large default pin icon.
+  // Match newly-drawn shapes to the same styling used for loaded data
+  // (small red dots for points, accent-colored lines/polygons), instead of
+  // Leaflet-Geoman's default look.
+  const geomType = e.shape === "Marker" ? "Point" : e.shape === "Line" ? "LineString" : "Polygon";
+  const style = styleForType(geomType);
+
   if (e.shape === "Marker") {
     const latlng = layer.getLatLng();
     layer.remove();
-    layer = L.circleMarker(latlng, {
-      radius: 5,
-      color: "#7a1f14",
-      weight: 1,
-      fillColor: "#d1392a",
-      fillOpacity: 0.9,
-    });
+    layer = L.circleMarker(latlng, style);
+  } else {
+    layer.setStyle(style);
   }
+  layer._baseStyle = style;
 
   editLayer.addLayer(layer);
   bindFeatureInteractions(layer);
@@ -138,15 +191,12 @@ function loadGeoJSON(geojsonObj, filename) {
   document.getElementById("export-filename").value = currentFilename;
 
   const layer = L.geoJSON(geojsonObj, {
-    pointToLayer: (feature, latlng) =>
-      L.circleMarker(latlng, {
-        radius: 5,
-        color: "#7a1f14",     // outline
-        weight: 1,
-        fillColor: "#d1392a", // red fill
-        fillOpacity: 0.9,
-      }),
-    onEachFeature: (feature, lyr) => bindFeatureInteractions(lyr),
+    pointToLayer: (feature, latlng) => L.circleMarker(latlng, styleForType("Point")),
+    style: (feature) => styleForType(feature.geometry && feature.geometry.type),
+    onEachFeature: (feature, lyr) => {
+      lyr._baseStyle = styleForType(feature.geometry && feature.geometry.type);
+      bindFeatureInteractions(lyr);
+    },
   });
 
   let count = 0;
