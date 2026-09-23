@@ -103,7 +103,22 @@ function selectFeature(layer) {
 
 // New shapes drawn with the toolbar
 map.on("pm:create", (e) => {
-  const layer = e.layer;
+  let layer = e.layer;
+
+  // Match newly-drawn points to the same small red dot style used for
+  // loaded data, instead of Leaflet's large default pin icon.
+  if (e.shape === "Marker") {
+    const latlng = layer.getLatLng();
+    layer.remove();
+    layer = L.circleMarker(latlng, {
+      radius: 5,
+      color: "#7a1f14",
+      weight: 1,
+      fillColor: "#d1392a",
+      fillOpacity: 0.9,
+    });
+  }
+
   editLayer.addLayer(layer);
   bindFeatureInteractions(layer);
   selectFeature(layer);
@@ -123,6 +138,14 @@ function loadGeoJSON(geojsonObj, filename) {
   document.getElementById("export-filename").value = currentFilename;
 
   const layer = L.geoJSON(geojsonObj, {
+    pointToLayer: (feature, latlng) =>
+      L.circleMarker(latlng, {
+        radius: 5,
+        color: "#7a1f14",     // outline
+        weight: 1,
+        fillColor: "#d1392a", // red fill
+        fillOpacity: 0.9,
+      }),
     onEachFeature: (feature, lyr) => bindFeatureInteractions(lyr),
   });
 
