@@ -34,10 +34,94 @@ const POINT_STYLE = { radius: 5, color: "#7a1f14", weight: 1, fillColor: "#d1392
 const LINE_STYLE = { color: "#2a4b9b", weight: 3, opacity: 0.9 };
 const POLY_STYLE = { color: "#2a4b9b", weight: 2, opacity: 0.9, fillColor: "#2a4b9b", fillOpacity: 0.15 };
 
-function styleForType(geomType) {
-  if (geomType === "Point" || geomType === "MultiPoint") return { ...POINT_STYLE };
-  if (geomType === "LineString" || geomType === "MultiLineString") return { ...LINE_STYLE };
-  return { ...POLY_STYLE }; // Polygon, MultiPolygon, Rectangle, etc.
+function styleForType(geomType, color) {
+  const base =
+    geomType === "Point" || geomType === "MultiPoint" ? POINT_STYLE :
+    geomType === "LineString" || geomType === "MultiLineString" ? LINE_STYLE :
+    POLY_STYLE; // Polygon, MultiPolygon, Rectangle, etc.
+  if (!color) return { ...base };
+  // Overlay mode: recolor by source instead of by geometry type, so two
+  // different files loaded at once are visually distinguishable.
+  return { ...base, color, fillColor: color };
+}
+
+// Distinct colors auto-assigned to each newly-loaded source (repo file or
+// upload), cycling if more sources are loaded than colors. Hand-drawn shapes
+// keep the fixed default styling above rather than pulling from this.
+const LAYER_PALETTE = ["#2a4b9b", "#b0432e", "#2f8f5b", "#8a4fbd", "#c07a1e", "#1e8f97", "#a3357a", "#5a6b1f"];
+let paletteIndex = 0;
+function nextLayerColor() {
+  const c = LAYER_PALETTE[paletteIndex % LAYER_PALETTE.length];
+  paletteIndex++;
+  return c;
+}
+
+// ---------------------------------------------------------------------------
+// Splitting one file's features into overlay layers (by a property, or by
+// geometry type) — this is what lets "one file with several kinds of data
+// in it" render as several toggleable/colorable layers instead of one blob.
+// ---------------------------------------------------------------------------
+function extractFeatures(geojsonObj) {
+  if (!geojsonObj) return [];
+  if (geojsonObj.type === "FeatureCollection") return geojsonObj.features || [];
+  if (geojsonObj.type === "Feature") return [geojsonObj];
+  return [{ type: "Feature", properties: {}, geometry: geojsonObj }]; // bare geometry
+}
+
+function normalizeGeomType(t) {
+  if (t === "Point" || t === "MultiPoint") return "Point";
+  if (t === "LineString" || t === "MultiLineString") return "Line";
+  return "Polygon"; // Polygon, MultiPolygon, and anything else
+}
+
+// Looks at every feature's properties and finds keys that plausibly name a
+// category — present on most features, with a handful of repeated values
+// (not a unique id). Returns candidate keys, best (fewest distinct values)
+// first, since that's usually the one meant as a "type"/"category" field.
+function detectGroupCandidates(features) {
+  if (!features.length) return [];
+  const propStats = new Map(); // key -> { values: Map(value -> count), seenOn: number }
+  features.forEach((f) => {
+    const props = (f && f.properties) || {};
+    Object.entries(props).forEach(([k, v]) => {
+      if (v === null || v === undefined || typeof v === "object") return;
+      if (!propStats.has(k)) propStats.set(k, { values: new Map(), seenOn: 0 });
+      const stat = propStats.get(k);
+      stat.seenOn++;
+      const vs = String(v);
+      stat.values.set(vs, (stat.values.get(vs) || 0) + 1);
+    });
+  });
+  const candidates = [];
+  propStats.forEach((stat, key) => {
+    const cardinality = stat.values.size;
+    const coverage = stat.seenOn / features.length;
+    if (cardinality >= 2 && cardinality <= 20 && cardinality < features.length && coverage >= 0.6) {
+      candidates.push({ key, cardinality, coverage });
+    }
+  });
+  candidates.sort((a, b) => a.cardinality - b.cardinality || b.coverage - a.coverage);
+  return candidates.map((c) => c.key);
+}
+
+// Splits features into Map(groupValue -> features[]) by a property key, by
+// geometry type ("__geomtype__"), or not at all ("" -> one group, "All").
+function groupFeatures(features, groupProperty) {
+  const groups = new Map();
+  features.forEach((f) => {
+    let val;
+    if (groupProperty === "__geomtype__") {
+      val = normalizeGeomType(f.geometry && f.geometry.type);
+    } else if (groupProperty) {
+      const raw = (f.properties || {})[groupProperty];
+      val = raw === undefined || raw === null || raw === "" ? "(none)" : String(raw);
+    } else {
+      val = "All features";
+    }
+    if (!groups.has(val)) groups.set(val, []);
+    groups.get(val).push(f);
+  });
+  return groups;
 }
 
 // ---------------------------------------------------------------------------
@@ -93,11 +177,38 @@ let editLayer = L.featureGroup().addTo(map);
 let selectedLayer = null;
 let focusMode = false;
 
-// sourceKey -> { label } for every file currently contributing features to
-// the map (repo files use "repo:<path>", uploads use a unique per-upload
-// key). Hand-drawn shapes use the fixed key "drawn" and aren't tracked here
-// since there's nothing to toggle them by.
+// sourceKey -> { label, rawGeojson, candidates, hasMultipleGeomTypes, groupProperty }
+// One entry per loaded FILE (repo files use "repo:<path>", uploads use a
+// unique per-upload key). This is what the "Split by" dropdown reads/writes.
+const fileSources = new Map();
+
+// subKey -> { label, sourceKey, groupValue, color, visible, opacity }.
+// One entry per visible OVERLAY LAYER. When a file isn't split, it has a
+// single subKey ("<sourceKey>::All features"); when split by a property or
+// by geometry type, it has one subKey per distinct value
+// ("<sourceKey>::<value>"). Hand-drawn shapes use the fixed key "drawn" and
+// aren't tracked here since there's nothing to toggle them by.
 const sourcesInfo = new Map();
+
+// subKey -> [leaflet layers]. Kept separate from editLayer's own layer list
+// because a hidden layer's shapes are removed from editLayer (so they stop
+// drawing/editing) but we still need to find them again to show them.
+const sourceLayers = new Map();
+
+// The effective Leaflet style for a layer, folding in its source's current
+// opacity setting on top of its base (geometry-type + color) style.
+function effectiveStyle(lyr) {
+  const base = lyr._baseStyle;
+  if (!base) return base;
+  const info = sourcesInfo.get(lyr._sourceKey);
+  const factor = info && info.opacity != null ? info.opacity / 100 : 1;
+  if (factor === 1) return base;
+  return {
+    ...base,
+    opacity: (base.opacity != null ? base.opacity : 1) * factor,
+    fillOpacity: (base.fillOpacity != null ? base.fillOpacity : 0) * factor,
+  };
+}
 
 const mapEl = document.getElementById("map");
 const badgeEl = document.getElementById("current-file-badge");
@@ -137,7 +248,7 @@ function updateFocusVisuals() {
   editLayer.eachLayer((lyr) => {
     if (!lyr._baseStyle) return;
     if (!active) {
-      lyr.setStyle(lyr._baseStyle);
+      lyr.setStyle(effectiveStyle(lyr));
       return;
     }
     if (lyr === selectedLayer) {
@@ -162,10 +273,14 @@ document.getElementById("fit-all-btn").addEventListener("click", fitToData);
 
 document.getElementById("clear-all-btn").addEventListener("click", () => {
   editLayer.clearLayers();
+  fileSources.clear();
   sourcesInfo.clear();
+  sourceLayers.clear();
+  paletteIndex = 0;
   selectFeature(null);
   updateBadge();
   renderFileList(getFilteredRepoFiles()); // uncheck every repo file row
+  renderLayersPanel();
   log("Cleared everything from the map.", "info");
 });
 
@@ -202,33 +317,128 @@ map.on("pm:remove", () => {
 // ---------------------------------------------------------------------------
 // Adding/removing one source's features to/from the shared editLayer
 // ---------------------------------------------------------------------------
-function addFeaturesFromGeoJSON(geojsonObj, sourceKey) {
+function addFeaturesFromGeoJSON(geojsonObj, sourceKey, color) {
   const built = L.geoJSON(geojsonObj, {
-    pointToLayer: (feature, latlng) => L.circleMarker(latlng, styleForType("Point")),
-    style: (feature) => styleForType(feature.geometry && feature.geometry.type),
+    pointToLayer: (feature, latlng) => L.circleMarker(latlng, styleForType("Point", color)),
+    style: (feature) => styleForType(feature.geometry && feature.geometry.type, color),
     onEachFeature: (feature, lyr) => {
-      lyr._baseStyle = styleForType(feature.geometry && feature.geometry.type);
+      lyr._baseStyle = styleForType(feature.geometry && feature.geometry.type, color);
       lyr._sourceKey = sourceKey;
       bindFeatureInteractions(lyr);
     },
   });
-  let count = 0;
+  const layers = [];
   built.eachLayer((lyr) => {
     editLayer.addLayer(lyr);
-    count++;
+    layers.push(lyr);
   });
-  return count;
+  sourceLayers.set(sourceKey, (sourceLayers.get(sourceKey) || []).concat(layers));
+  return layers.length;
 }
 
+// Removes a source's layers everywhere (map + tracking), whether or not it
+// was currently hidden. Used when a source is unloaded entirely (unchecked,
+// or removed from the Layers panel) — not for a simple visibility toggle.
 function removeLayersForSource(sourceKey) {
-  const toRemove = [];
-  editLayer.eachLayer((lyr) => {
-    if (lyr._sourceKey === sourceKey) toRemove.push(lyr);
-  });
-  toRemove.forEach((lyr) => {
+  const layers = sourceLayers.get(sourceKey) || [];
+  layers.forEach((lyr) => {
     if (lyr === selectedLayer) selectFeature(null);
-    editLayer.removeLayer(lyr);
+    if (editLayer.hasLayer(lyr)) editLayer.removeLayer(lyr);
   });
+  sourceLayers.delete(sourceKey);
+}
+
+// Shows/hides one overlay layer's features without losing them — no refetch
+// needed to bring them back.
+function setSourceVisibility(subKey, visible) {
+  const info = sourcesInfo.get(subKey);
+  if (info) info.visible = visible;
+  const layers = sourceLayers.get(subKey) || [];
+  layers.forEach((lyr) => {
+    if (visible) {
+      if (!editLayer.hasLayer(lyr)) editLayer.addLayer(lyr);
+    } else {
+      if (lyr === selectedLayer) selectFeature(null);
+      if (editLayer.hasLayer(lyr)) editLayer.removeLayer(lyr);
+    }
+  });
+  updateBadge();
+}
+
+// Fades one overlay layer in/out (0-100) relative to its own base style.
+function setSourceOpacity(subKey, opacityPct) {
+  const info = sourcesInfo.get(subKey);
+  if (!info) return;
+  info.opacity = opacityPct;
+  updateFocusVisuals(); // re-applies effectiveStyle() to every visible layer
+}
+
+// Removes every overlay layer belonging to one file (used both when the
+// file is unloaded entirely, and when it's about to be re-split by a
+// different property).
+function removeAllSubLayersForFile(sourceKey) {
+  [...sourcesInfo.entries()]
+    .filter(([, info]) => info.sourceKey === sourceKey)
+    .forEach(([subKey]) => {
+      removeLayersForSource(subKey);
+      sourcesInfo.delete(subKey);
+    });
+}
+
+// (Re)builds one file's overlay layers from its already-fetched GeoJSON,
+// splitting its features into groups by the given property ("" = don't
+// split, "__geomtype__" = split by geometry type, or a property key found
+// in the data). This is what runs on first load AND whenever the "Split
+// by" dropdown for that file changes.
+function loadSourceIntoLayers(sourceKey, groupProperty) {
+  const src = fileSources.get(sourceKey);
+  if (!src) return 0;
+  removeAllSubLayersForFile(sourceKey);
+  src.groupProperty = groupProperty;
+
+  const features = extractFeatures(src.rawGeojson);
+  const groups = groupFeatures(features, groupProperty);
+  let total = 0;
+  groups.forEach((feats, groupValue) => {
+    const subKey = sourceKey + "::" + groupValue;
+    const color = nextLayerColor();
+    const count = addFeaturesFromGeoJSON({ type: "FeatureCollection", features: feats }, subKey, color);
+    sourcesInfo.set(subKey, {
+      label: groupProperty ? `${src.label} — ${groupValue}` : src.label,
+      sourceKey,
+      groupValue,
+      color,
+      visible: true,
+      opacity: 100,
+    });
+    total += count;
+  });
+  return total;
+}
+
+// First-time load of a file: figures out a sensible default split (a
+// property that looks like a category, else geometry type if the file
+// mixes points/lines/polygons, else no split) and builds its layers.
+function registerFileSource(sourceKey, label, rawGeojson) {
+  const features = extractFeatures(rawGeojson);
+  const candidates = detectGroupCandidates(features);
+  const hasMultipleGeomTypes = new Set(features.map((f) => normalizeGeomType(f.geometry && f.geometry.type))).size > 1;
+  const defaultGroupProperty = candidates.length ? candidates[0] : hasMultipleGeomTypes ? "__geomtype__" : "";
+
+  fileSources.set(sourceKey, { label, rawGeojson, candidates, hasMultipleGeomTypes, groupProperty: defaultGroupProperty });
+  return loadSourceIntoLayers(sourceKey, defaultGroupProperty);
+}
+
+// Fully unloads one file: removes all its overlay layers, forgets it, and
+// refreshes the Layers panel and (for repo sources) the file-list checkbox.
+function removeFileEverywhere(sourceKey) {
+  removeAllSubLayersForFile(sourceKey);
+  fileSources.delete(sourceKey);
+  updateBadge();
+  maybeSetExportDefault();
+  renderLayersPanel();
+  if (sourceKey.startsWith("repo:")) renderFileList(getFilteredRepoFiles());
+  log(`Removed ${sourceKey.replace(/^repo:|^upload:/, "").split(":")[0]} from the map`, "info");
 }
 
 function updateBadge() {
@@ -237,9 +447,88 @@ function updateBadge() {
     badgeEl.textContent = "No file loaded yet.";
     return;
   }
-  const labels = [...sourcesInfo.values()].map((s) => escapeHtml(s.label));
+  const labels = [...fileSources.values()].map((s) => escapeHtml(s.label));
   const prefix = labels.length ? labels.join(", ") : "Hand-drawn shapes";
   badgeEl.innerHTML = `<strong>${prefix}</strong> — ${total} feature${total === 1 ? "" : "s"}`;
+}
+
+// ---------------------------------------------------------------------------
+// Layers panel — one group per loaded FILE (with a "Split by" control to
+// break that single file into several overlay layers), each containing one
+// row per overlay layer that split currently produces.
+// ---------------------------------------------------------------------------
+const layersPanelEl = document.getElementById("layers-panel");
+
+function renderLayersPanel() {
+  if (fileSources.size === 0) {
+    layersPanelEl.innerHTML = `<div class="layers-empty">Nothing loaded yet — check a file above or upload one.</div>`;
+    return;
+  }
+  layersPanelEl.innerHTML = "";
+
+  fileSources.forEach((src, sourceKey) => {
+    const group = document.createElement("div");
+    group.className = "layer-file-group";
+
+    const header = document.createElement("div");
+    header.className = "layer-file-header";
+    header.innerHTML = `
+      <span class="layer-file-name">${escapeHtml(src.label)}</span>
+      <select class="layer-groupby" title="Split this file's features into overlay layers"></select>
+      <button class="layer-file-remove" title="Remove this file">×</button>`;
+
+    const select = header.querySelector(".layer-groupby");
+    const options = [{ value: "", text: "Single layer" }];
+    if (src.hasMultipleGeomTypes) options.push({ value: "__geomtype__", text: "By geometry type" });
+    src.candidates.forEach((key) => options.push({ value: key, text: `By "${key}"` }));
+    select.innerHTML = options
+      .map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.text)}</option>`)
+      .join("");
+    select.value = src.groupProperty || "";
+
+    select.addEventListener("change", () => {
+      loadSourceIntoLayers(sourceKey, select.value);
+      updateBadge();
+      maybeSetExportDefault();
+      fitToData();
+      renderLayersPanel();
+      const how = select.value ? select.options[select.selectedIndex].text.toLowerCase() : "back into a single layer";
+      log(`Split ${src.label} ${how}`, "info");
+    });
+    header.querySelector(".layer-file-remove").addEventListener("click", () => removeFileEverywhere(sourceKey));
+
+    group.appendChild(header);
+
+    [...sourcesInfo.entries()]
+      .filter(([, info]) => info.sourceKey === sourceKey)
+      .forEach(([subKey, info]) => {
+        const count = (sourceLayers.get(subKey) || []).length;
+        const row = document.createElement("div");
+        row.className = "layer-row" + (info.visible ? "" : " layer-hidden");
+        row.innerHTML = `
+          <span class="layer-swatch" style="background:${info.color}"></span>
+          <span class="layer-main">
+            <span class="layer-name">${escapeHtml(src.groupProperty ? info.groupValue : "All features")}</span>
+            <span class="layer-count">${count} feature${count === 1 ? "" : "s"}</span>
+          </span>
+          <label class="layer-vis-toggle" title="Show/hide this layer">
+            <input type="checkbox" ${info.visible ? "checked" : ""} />
+          </label>
+          <input type="range" class="layer-opacity" min="10" max="100" value="${info.opacity}" title="Layer opacity" />`;
+
+        row.querySelector(".layer-vis-toggle input").addEventListener("change", (e) => {
+          setSourceVisibility(subKey, e.target.checked);
+          row.classList.toggle("layer-hidden", !e.target.checked);
+        });
+        row.querySelector(".layer-opacity").addEventListener("input", (e) => {
+          setSourceOpacity(subKey, Number(e.target.value));
+        });
+
+        group.appendChild(row);
+      });
+
+    layersPanelEl.appendChild(group);
+  });
 }
 
 // Keep the export filename in sync with what's loaded, but only while the
@@ -248,7 +537,7 @@ let lastAutoFilename = "";
 function maybeSetExportDefault() {
   const el = document.getElementById("export-filename");
   if (el.value.trim() !== "" && el.value !== lastAutoFilename) return; // they customized it — leave it alone
-  const labels = [...sourcesInfo.values()].map((s) => s.label);
+  const labels = [...fileSources.values()].map((s) => s.label);
   const next = labels.length === 1 ? labels[0] : labels.length > 1 ? "combined.geojson" : "edited.geojson";
   el.value = next;
   lastAutoFilename = next;
@@ -291,7 +580,7 @@ function renderFileList(files) {
   fileListEl.innerHTML = "";
   files.forEach((f) => {
     const sourceKey = "repo:" + f.path;
-    const isLoaded = sourcesInfo.has(sourceKey);
+    const isLoaded = fileSources.has(sourceKey);
 
     const row = document.createElement("label"); // label so clicking anywhere toggles the checkbox
     row.className = "file-row" + (isLoaded ? " selected" : "");
@@ -314,12 +603,7 @@ async function toggleRepoFile(f, checked, rowEl) {
   const sourceKey = "repo:" + f.path;
 
   if (!checked) {
-    removeLayersForSource(sourceKey);
-    sourcesInfo.delete(sourceKey);
-    rowEl.classList.remove("selected");
-    updateBadge();
-    maybeSetExportDefault();
-    log(`Removed ${f.path} from the map`, "info");
+    removeFileEverywhere(sourceKey); // also re-renders the file list itself
     return;
   }
 
@@ -330,9 +614,9 @@ async function toggleRepoFile(f, checked, rowEl) {
     const res = await fetch(rawUrl);
     if (!res.ok) throw new Error(`raw fetch returned ${res.status}`);
     const geojson = await res.json();
-    const count = addFeaturesFromGeoJSON(geojson, sourceKey);
-    sourcesInfo.set(sourceKey, { label: f.name });
+    const count = registerFileSource(sourceKey, f.name, geojson);
     updateBadge();
+    renderLayersPanel();
     maybeSetExportDefault();
     fitToData();
     log(`Loaded ${count} feature(s) from ${f.path}`, "ok");
@@ -360,9 +644,9 @@ function handleFiles(fileList) {
       try {
         const geojson = JSON.parse(reader.result);
         const sourceKey = "upload:" + file.name + ":" + Date.now() + ":" + Math.random();
-        const count = addFeaturesFromGeoJSON(geojson, sourceKey);
-        sourcesInfo.set(sourceKey, { label: file.name });
+        const count = registerFileSource(sourceKey, file.name, geojson);
         updateBadge();
+        renderLayersPanel();
         maybeSetExportDefault();
         fitToData();
         log(`Loaded ${count} feature(s) from uploaded ${file.name}`, "ok");
@@ -455,7 +739,13 @@ function makePropRow(layer, key, value) {
 // Export
 // ---------------------------------------------------------------------------
 document.getElementById("export-btn").addEventListener("click", () => {
-  const geojson = editLayer.toGeoJSON();
+  // Union of what's currently on the map (covers hand-drawn shapes, which
+  // aren't tracked in sourceLayers) with every tracked source layer (covers
+  // layers currently toggled off) — hiding a layer shouldn't drop it from
+  // the export, only from view.
+  const allLayers = new Set(editLayer.getLayers());
+  sourceLayers.forEach((layers) => layers.forEach((lyr) => allLayers.add(lyr)));
+  const geojson = L.featureGroup([...allLayers]).toGeoJSON();
   const filename = document.getElementById("export-filename").value.trim() || "edited.geojson";
   const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/geo+json" });
   const url = URL.createObjectURL(blob);
