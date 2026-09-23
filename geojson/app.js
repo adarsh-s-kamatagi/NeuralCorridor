@@ -48,7 +48,7 @@ document.querySelectorAll(".source-tab").forEach((tab) => {
 // ---------------------------------------------------------------------------
 // Map + editable layer setup (Leaflet + Leaflet-Geoman)
 // ---------------------------------------------------------------------------
-const map = L.map("map").setView([20, 0], 2);
+const map = L.map("map", { preferCanvas: true }).setView([20, 0], 2);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: "&copy; OpenStreetMap contributors",
@@ -211,13 +211,22 @@ async function selectRepoFile(f, rowEl) {
   document.querySelectorAll(".file-row.selected").forEach((r) => r.classList.remove("selected"));
   if (rowEl) rowEl.classList.add("selected");
 
+  // Immediate feedback — large files can take a few seconds to fetch, parse
+  // and draw, and with no feedback that looks identical to "broken".
+  setBadge(f.name + " (loading…)", 0);
+  log(`Fetching ${f.path} …`, "info");
+
   const rawUrl = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${f.path}`;
   try {
     const res = await fetch(rawUrl);
     if (!res.ok) throw new Error(`raw fetch returned ${res.status}`);
     const geojson = await res.json();
+    log(`Parsed ${f.path}, drawing on map…`, "info");
+    // Let the "drawing…" message paint before the (potentially slow) render.
+    await new Promise((r) => setTimeout(r, 0));
     loadGeoJSON(geojson, f.name);
   } catch (err) {
+    setBadge(null);
     log(`Failed to load ${f.path}: ${err.message}`, "bad");
   }
 }
