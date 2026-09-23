@@ -20,16 +20,16 @@ function log(msg, kind) {
   logEl.scrollTop = logEl.scrollHeight;
 }
 
-const badgeEl = document.getElementById("current-file-badge");
-function setBadge(name, count) {
-  badgeEl.innerHTML = name
-    ? `Editing: <strong>${escapeHtml(name)}</strong> — ${count} feature${count === 1 ? "" : "s"}`
-    : "No file loaded yet.";
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
 }
 
-// Shared base styles, keyed by geometry type — used for both loaded
-// GeoJSON and shapes drawn with the toolbar, so everything looks the same
-// and can be dimmed/restored consistently in focus mode.
+// Shared base styles, keyed by geometry type — used for loaded GeoJSON and
+// shapes drawn with the toolbar, so everything looks consistent (and can be
+// dimmed/restored consistently in focus mode) no matter which file, or how
+// many files, it came from.
 const POINT_STYLE = { radius: 5, color: "#7a1f14", weight: 1, fillColor: "#d1392a", fillOpacity: 0.9 };
 const LINE_STYLE = { color: "#2a4b9b", weight: 3, opacity: 0.9 };
 const POLY_STYLE = { color: "#2a4b9b", weight: 2, opacity: 0.9, fillColor: "#2a4b9b", fillOpacity: 0.15 };
@@ -38,12 +38,6 @@ function styleForType(geomType) {
   if (geomType === "Point" || geomType === "MultiPoint") return { ...POINT_STYLE };
   if (geomType === "LineString" || geomType === "MultiLineString") return { ...LINE_STYLE };
   return { ...POLY_STYLE }; // Polygon, MultiPolygon, Rectangle, etc.
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  }[c]));
 }
 
 // ---------------------------------------------------------------------------
@@ -92,24 +86,26 @@ map.pm.addControls({
   removalMode: true,
 });
 
-// Every editable feature lives in this layer group.
+// Every feature from every loaded source (plus hand-drawn shapes) lives in
+// this single FeatureGroup, so editing/export always covers everything
+// that's currently on the map.
 let editLayer = L.featureGroup().addTo(map);
 let selectedLayer = null;
-let currentFilename = "edited.geojson";
 let focusMode = false;
 
+// sourceKey -> { label } for every file currently contributing features to
+// the map (repo files use "repo:<path>", uploads use a unique per-upload
+// key). Hand-drawn shapes use the fixed key "drawn" and aren't tracked here
+// since there's nothing to toggle them by.
+const sourcesInfo = new Map();
+
 const mapEl = document.getElementById("map");
+const badgeEl = document.getElementById("current-file-badge");
+
 document.getElementById("focus-toggle").addEventListener("change", (e) => {
   focusMode = e.target.checked;
   updateFocusVisuals();
 });
-
-function clearMap() {
-  editLayer.clearLayers();
-  selectedLayer = null;
-  renderPropsPanel(null);
-  updateFocusVisuals();
-}
 
 function bindFeatureInteractions(layer) {
   if (!layer.feature) layer.feature = { type: "Feature", properties: {} };
@@ -153,6 +149,26 @@ function updateFocusVisuals() {
   });
 }
 
+// "Focus on the entire map" — zoom/pan to fit everything currently loaded.
+function fitToData() {
+  const layers = editLayer.getLayers();
+  if (!layers.length) {
+    log("Nothing loaded yet to fit to.", "info");
+    return;
+  }
+  map.fitBounds(editLayer.getBounds(), { maxZoom: 16, padding: [20, 20] });
+}
+document.getElementById("fit-all-btn").addEventListener("click", fitToData);
+
+document.getElementById("clear-all-btn").addEventListener("click", () => {
+  editLayer.clearLayers();
+  sourcesInfo.clear();
+  selectFeature(null);
+  updateBadge();
+  renderFileList(getFilteredRepoFiles()); // uncheck every repo file row
+  log("Cleared everything from the map.", "info");
+});
+
 // New shapes drawn with the toolbar
 map.on("pm:create", (e) => {
   let layer = e.layer;
@@ -171,6 +187,7 @@ map.on("pm:create", (e) => {
     layer.setStyle(style);
   }
   layer._baseStyle = style;
+  layer._sourceKey = "drawn";
 
   editLayer.addLayer(layer);
   bindFeatureInteractions(layer);
@@ -183,41 +200,71 @@ map.on("pm:remove", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Loading GeoJSON (from either source) onto the map
+// Adding/removing one source's features to/from the shared editLayer
 // ---------------------------------------------------------------------------
-function loadGeoJSON(geojsonObj, filename) {
-  clearMap();
-  currentFilename = filename || "edited.geojson";
-  document.getElementById("export-filename").value = currentFilename;
-
-  const layer = L.geoJSON(geojsonObj, {
+function addFeaturesFromGeoJSON(geojsonObj, sourceKey) {
+  const built = L.geoJSON(geojsonObj, {
     pointToLayer: (feature, latlng) => L.circleMarker(latlng, styleForType("Point")),
     style: (feature) => styleForType(feature.geometry && feature.geometry.type),
     onEachFeature: (feature, lyr) => {
       lyr._baseStyle = styleForType(feature.geometry && feature.geometry.type);
+      lyr._sourceKey = sourceKey;
       bindFeatureInteractions(lyr);
     },
   });
-
   let count = 0;
-  layer.eachLayer((lyr) => {
+  built.eachLayer((lyr) => {
     editLayer.addLayer(lyr);
     count++;
   });
+  return count;
+}
 
-  if (count > 0) {
-    map.fitBounds(editLayer.getBounds(), { maxZoom: 16 });
+function removeLayersForSource(sourceKey) {
+  const toRemove = [];
+  editLayer.eachLayer((lyr) => {
+    if (lyr._sourceKey === sourceKey) toRemove.push(lyr);
+  });
+  toRemove.forEach((lyr) => {
+    if (lyr === selectedLayer) selectFeature(null);
+    editLayer.removeLayer(lyr);
+  });
+}
+
+function updateBadge() {
+  const total = editLayer.getLayers().length;
+  if (total === 0) {
+    badgeEl.textContent = "No file loaded yet.";
+    return;
   }
-  setBadge(currentFilename, count);
-  log(`Loaded ${count} feature(s) from ${currentFilename}`, "ok");
+  const labels = [...sourcesInfo.values()].map((s) => escapeHtml(s.label));
+  const prefix = labels.length ? labels.join(", ") : "Hand-drawn shapes";
+  badgeEl.innerHTML = `<strong>${prefix}</strong> — ${total} feature${total === 1 ? "" : "s"}`;
+}
+
+// Keep the export filename in sync with what's loaded, but only while the
+// person hasn't typed their own filename in.
+let lastAutoFilename = "";
+function maybeSetExportDefault() {
+  const el = document.getElementById("export-filename");
+  if (el.value.trim() !== "" && el.value !== lastAutoFilename) return; // they customized it — leave it alone
+  const labels = [...sourcesInfo.values()].map((s) => s.label);
+  const next = labels.length === 1 ? labels[0] : labels.length > 1 ? "combined.geojson" : "edited.geojson";
+  el.value = next;
+  lastAutoFilename = next;
 }
 
 // ---------------------------------------------------------------------------
-// Source 1: browse files already in the repo (via GitHub's Git Trees API)
+// Source 1: browse & multi-select files already in the repo (GitHub Git Trees API)
 // ---------------------------------------------------------------------------
 const fileListEl = document.getElementById("file-list");
 const fileSearchEl = document.getElementById("file-search");
 let repoFiles = []; // [{path, name}]
+
+function getFilteredRepoFiles() {
+  const q = fileSearchEl.value.trim().toLowerCase();
+  return q ? repoFiles.filter((f) => f.path.toLowerCase().includes(q)) : repoFiles;
+}
 
 async function fetchRepoFileList() {
   const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/git/trees/${GH_BRANCH}?recursive=1`;
@@ -243,40 +290,56 @@ function renderFileList(files) {
   }
   fileListEl.innerHTML = "";
   files.forEach((f) => {
-    const row = document.createElement("div");
-    row.className = "file-row";
-    row.innerHTML = `<span>${escapeHtml(f.name)}</span><span class="file-path">${escapeHtml(f.path)}</span>`;
-    row.addEventListener("click", () => selectRepoFile(f, row));
+    const sourceKey = "repo:" + f.path;
+    const isLoaded = sourcesInfo.has(sourceKey);
+
+    const row = document.createElement("label"); // label so clicking anywhere toggles the checkbox
+    row.className = "file-row" + (isLoaded ? " selected" : "");
+    row.innerHTML = `
+      <span class="file-row-main">
+        <input type="checkbox" ${isLoaded ? "checked" : ""} />
+        <span>${escapeHtml(f.name)}</span>
+      </span>
+      <span class="file-path">${escapeHtml(f.path)}</span>`;
+
+    const checkbox = row.querySelector("input");
+    checkbox.addEventListener("change", () => toggleRepoFile(f, checkbox.checked, row));
     fileListEl.appendChild(row);
   });
 }
 
-fileSearchEl.addEventListener("input", () => {
-  const q = fileSearchEl.value.trim().toLowerCase();
-  const filtered = q ? repoFiles.filter((f) => f.path.toLowerCase().includes(q)) : repoFiles;
-  renderFileList(filtered);
-});
+fileSearchEl.addEventListener("input", () => renderFileList(getFilteredRepoFiles()));
 
-async function selectRepoFile(f, rowEl) {
-  document.querySelectorAll(".file-row.selected").forEach((r) => r.classList.remove("selected"));
-  if (rowEl) rowEl.classList.add("selected");
+async function toggleRepoFile(f, checked, rowEl) {
+  const sourceKey = "repo:" + f.path;
 
-  // Immediate feedback — large files can take a few seconds to fetch, parse
-  // and draw, and with no feedback that looks identical to "broken".
-  setBadge(f.name + " (loading…)", 0);
+  if (!checked) {
+    removeLayersForSource(sourceKey);
+    sourcesInfo.delete(sourceKey);
+    rowEl.classList.remove("selected");
+    updateBadge();
+    maybeSetExportDefault();
+    log(`Removed ${f.path} from the map`, "info");
+    return;
+  }
+
+  rowEl.classList.add("selected");
   log(`Fetching ${f.path} …`, "info");
-
   const rawUrl = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${f.path}`;
   try {
     const res = await fetch(rawUrl);
     if (!res.ok) throw new Error(`raw fetch returned ${res.status}`);
     const geojson = await res.json();
-    log(`Parsed ${f.path}, drawing on map…`, "info");
-    // Let the "drawing…" message paint before the (potentially slow) render.
-    await new Promise((r) => setTimeout(r, 0));
-    loadGeoJSON(geojson, f.name);
+    const count = addFeaturesFromGeoJSON(geojson, sourceKey);
+    sourcesInfo.set(sourceKey, { label: f.name });
+    updateBadge();
+    maybeSetExportDefault();
+    fitToData();
+    log(`Loaded ${count} feature(s) from ${f.path}`, "ok");
   } catch (err) {
-    setBadge(null);
+    rowEl.classList.remove("selected");
+    const cb = rowEl.querySelector("input");
+    if (cb) cb.checked = false;
     log(`Failed to load ${f.path}: ${err.message}`, "bad");
   }
 }
@@ -284,35 +347,40 @@ async function selectRepoFile(f, rowEl) {
 fetchRepoFileList();
 
 // ---------------------------------------------------------------------------
-// Source 2: upload a local file not yet in the repo
+// Source 2: upload one or more local files not yet in the repo
 // ---------------------------------------------------------------------------
 const fileInputEl = document.getElementById("file-input");
 const dropEl = document.getElementById("upload-drop");
 
-function handleFile(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const geojson = JSON.parse(reader.result);
-      loadGeoJSON(geojson, file.name);
-    } catch (err) {
-      log(`Couldn't parse ${file.name}: ${err.message}`, "bad");
-    }
-  };
-  reader.onerror = () => log(`Couldn't read ${file.name}`, "bad");
-  reader.readAsText(file);
+function handleFiles(fileList) {
+  Array.from(fileList || []).forEach((file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const geojson = JSON.parse(reader.result);
+        const sourceKey = "upload:" + file.name + ":" + Date.now() + ":" + Math.random();
+        const count = addFeaturesFromGeoJSON(geojson, sourceKey);
+        sourcesInfo.set(sourceKey, { label: file.name });
+        updateBadge();
+        maybeSetExportDefault();
+        fitToData();
+        log(`Loaded ${count} feature(s) from uploaded ${file.name}`, "ok");
+      } catch (err) {
+        log(`Couldn't parse ${file.name}: ${err.message}`, "bad");
+      }
+    };
+    reader.onerror = () => log(`Couldn't read ${file.name}`, "bad");
+    reader.readAsText(file);
+  });
 }
 
-fileInputEl.addEventListener("change", (e) => handleFile(e.target.files[0]));
+fileInputEl.addEventListener("change", (e) => handleFiles(e.target.files));
 
 ["dragover", "dragleave", "drop"].forEach((evt) => {
   dropEl.addEventListener(evt, (e) => e.preventDefault());
 });
-dropEl.addEventListener("drop", (e) => {
-  const file = e.dataTransfer.files && e.dataTransfer.files[0];
-  handleFile(file);
-});
+dropEl.addEventListener("drop", (e) => handleFiles(e.dataTransfer.files));
 
 // ---------------------------------------------------------------------------
 // Properties panel
