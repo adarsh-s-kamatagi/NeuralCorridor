@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GeoJSON Editor — NeuralCorridor</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/geojson.css" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.18.3/dist/leaflet-geoman.css" />
+</head>
+<body>
+
+  <div class="wrap">
+    <nav class="site-nav">
+      <a href="../index.html">GNN Trial</a>
+      <a href="index.html" class="active">GeoJSON Editor</a>
+    </nav>
+
+    <header>
+      <h1>GeoJSON Editor</h1>
+      <p class="subtitle">Browse GeoJSON files from this repo, or upload your own — view them on a map, edit geometry and properties, then download the result.</p>
+    </header>
+
+    <h2>1. Load a file</h2>
+
+    <div class="source-tabs">
+      <button class="source-tab active" data-tab="repo">From repo</button>
+      <button class="source-tab" data-tab="upload">Upload local file</button>
+    </div>
+
+    <div class="source-panel active" id="panel-repo">
+      <p style="color: var(--ink-soft); font-size: 14.5px; margin-top: 0;">
+        Lists every <code>.geojson</code> file under <code id="data-dir-label">data/</code> in this repo.
+      </p>
+      <input type="text" id="file-search" placeholder="Search files…" />
+      <div id="file-list"><div class="file-row" style="cursor:default;">Loading file list…</div></div>
+    </div>
+
+    <div class="source-panel" id="panel-upload">
+      <div class="upload-drop" id="upload-drop">
+        Drag a .geojson file here, or
+        <div><input type="file" id="file-input" accept=".geojson,.json,application/geo+json,application/json" /></div>
+      </div>
+    </div>
+
+    <h2>2. Map</h2>
+    <div id="current-file-badge">No file loaded yet.</div>
+    <div id="map"></div>
+    <p style="color: var(--ink-faint); font-size: 13px; margin-top: -8px;">
+      Use the drawing toolbar (top-left of the map) to add points/lines/polygons, drag vertices to edit, or delete shapes. Click any feature to edit its properties below.
+    </p>
+
+    <h2>3. Selected feature — properties</h2>
+    <div class="props-panel" id="props-panel">
+      <div class="props-empty">Click a feature on the map to edit its properties.</div>
+    </div>
+
+    <h2>4. Export</h2>
+    <div class="export-row">
+      <input type="text" id="export-filename" value="edited.geojson" />
+      <button class="run-btn" id="export-btn">Download GeoJSON</button>
+    </div>
+
+    <h2>Log</h2>
+    <div id="log">Ready.</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.18.3/dist/leaflet-geoman.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
