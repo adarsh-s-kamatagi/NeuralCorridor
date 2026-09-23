@@ -22,6 +22,10 @@
         <a href="index.html" class="active">GeoJSON Editor</a>
       </nav>
       <div id="current-file-badge">No file loaded yet.</div>
+      <div class="topbar-actions">
+        <button id="fit-all-btn" class="run-btn secondary">Fit to data</button>
+        <button id="clear-all-btn" class="run-btn secondary">Clear all</button>
+      </div>
     </header>
 
     <div class="main-row">
@@ -35,15 +39,16 @@
         </div>
 
         <div class="source-panel active" id="panel-repo">
-          <p class="hint">.geojson files under <code id="data-dir-label">data/</code></p>
+          <p class="hint">.geojson files under <code id="data-dir-label">data/</code> — check as many as you like to combine them (e.g. nodes + paths).</p>
           <input type="text" id="file-search" placeholder="Search files…" />
           <div id="file-list"><div class="file-row" style="cursor:default;">Loading file list…</div></div>
         </div>
 
         <div class="source-panel" id="panel-upload">
           <div class="upload-drop" id="upload-drop">
-            Drag a .geojson file here, or
-            <div><input type="file" id="file-input" accept=".geojson,.json,application/geo+json,application/json" /></div>
+            Drag one or more .geojson files here, or
+            <div><input type="file" id="file-input" accept=".geojson,.json,application/geo+json,application/json" multiple /></div>
+            <p class="hint" style="margin-top:8px; margin-bottom:0;">Each upload adds to the map — it doesn't replace what's already there.</p>
           </div>
         </div>
 
