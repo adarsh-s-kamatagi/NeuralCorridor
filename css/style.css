@@ -29,6 +29,24 @@ body {
 
 .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 24px 80px; }
 
+.site-nav {
+  display: flex;
+  gap: 4px;
+  padding: 18px 0 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.site-nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.site-nav a:hover { background: var(--bg-raised); color: var(--ink); }
+.site-nav a.active { color: var(--ink); background: var(--accent-soft); }
+
 header {
   border-bottom: 1px solid var(--rule);
   padding: 28px 0 20px;
@@ -224,4 +242,3 @@ button.run-btn:disabled { background: var(--ink-faint); cursor: not-allowed; }
 .node-chip.correct { background: #e5f2ea; border-color: var(--good); color: var(--good); }
 .node-chip.wrong { background: #f5e7e4; border-color: var(--bad); color: var(--bad); }
 .node-chip.labeled { font-weight: 700; box-shadow: 0 0 0 2px var(--gold) inset; }
-
