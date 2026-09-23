@@ -1,0 +1,2071 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-09-22T08:45:51Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 6000982599,
+      "lat": 15.4536096,
+      "lon": 75.0073554,
+      "tags": {
+        "bus": "yes",
+        "highway": "bus_stop",
+        "name": "Kukkeshree Travels Bus Stop",
+        "operator": "JAY PEE TOURS & TRAVELS",
+        "public_transport": "platform"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6001000258,
+      "lat": 15.4536096,
+      "lon": 75.0073554,
+      "tags": {
+        "bus": "yes",
+        "highway": "bus_stop",
+        "name": "Sr Tours & Travels Bus Stop",
+        "public_transport": "platform"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6001011492,
+      "lat": 15.4536096,
+      "lon": 75.0073554,
+      "tags": {
+        "bus": "yes",
+        "highway": "bus_stop",
+        "name": "Sri Kadri Travels Bus Stop",
+        "public_transport": "platform"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6001013706,
+      "lat": 15.4536096,
+      "lon": 75.0073554,
+      "tags": {
+        "bus": "yes",
+        "highway": "bus_stop",
+        "name": "Srs Travels Bus Stop",
+        "public_transport": "platform"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6001013762,
+      "lat": 15.4536096,
+      "lon": 75.0073554,
+      "tags": {
+        "bus": "yes",
+        "highway": "bus_stop",
+        "name": "Ravindra Travels Bus Stop",
+        "public_transport": "platform"
+      }
+    },
+    {
+      "type": "way",
+      "id": 97065844,
+      "nodes": [
+        1124599670,
+        1124599584,
+        1124599629,
+        1124599663,
+        1124599603,
+        1124599636,
+        1124599672,
+        1124599610,
+        1124599651,
+        1124599682,
+        1741083638,
+        1741083593,
+        1124599670
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "barrier": "wall",
+        "bus": "yes",
+        "name": "Old Bus Station",
+        "name:kn": "ಹಳೆ ಬಸ್ ನಿಲ್ದಾನ",
+        "name:ur": "پرانا بس اسٹیشن",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 123286766,
+      "nodes": [
+        1375421066,
+        1375421074,
+        1375421078,
+        1375421068,
+        7860691255,
+        4030805769,
+        1375421073,
+        1375421066
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "name": "Central Bus Terminus",
+        "name:kn": "ಕೇಂದ್ರೀಯ ಬಸ್ ನಿಲ್ದಾಣ"
+      }
+    },
+    {
+      "type": "way",
+      "id": 162173241,
+      "nodes": [
+        1741077415,
+        1741077467,
+        1741077386,
+        1741077422,
+        1741077415
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "name": "VRL IT Park Bus stand"
+      }
+    },
+    {
+      "type": "way",
+      "id": 222610559,
+      "nodes": [
+        2315624555,
+        2315624551,
+        2315624554,
+        2315624552,
+        2315624553,
+        2315624555
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "bus": "yes",
+        "name": "Dharwad Old Bus Stand",
+        "name:kn": "ಧಾರವಾಢ ಹಳೆ ಬಸ್ ನಿಲ್ದಾಣ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 222610761,
+      "nodes": [
+        2315626644,
+        2315626645,
+        2315626643,
+        2315626646,
+        2315626644
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "name": "City Bus Stand",
+        "name:kn": "ಶಹರ ಬಸ್ ನಿಲ್ದಾಣ"
+      }
+    },
+    {
+      "type": "way",
+      "id": 353385853,
+      "nodes": [
+        3591685325,
+        3591685310,
+        3591685305,
+        3591685323,
+        3591685314,
+        3591685316,
+        3591685309,
+        3591685296,
+        3591685318,
+        3591685303,
+        3591685304,
+        3591685322,
+        3591685300,
+        3591685325
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Hosur Interchange Terminal",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 388889549,
+      "nodes": [
+        3920724930,
+        3920724934,
+        3920724918,
+        3920724933,
+        3920724928,
+        3920724926,
+        3920724925,
+        3920724905,
+        3920724930
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "name": "VRL Basava Vana Bus Stand",
+        "name:kn": "ಬಸ್ ನಿಲ್ದಾಣ"
+      }
+    },
+    {
+      "type": "way",
+      "id": 617764534,
+      "nodes": [
+        5839510240,
+        5839510241,
+        5839510242,
+        5839510243,
+        5839510240
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "ISKON BRT Station",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 617764535,
+      "nodes": [
+        5839510245,
+        5839510246,
+        5839510247,
+        5839510248,
+        5839510245
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "RTO BRT Station",
+        "name:kn": "ಪ್ರಾದೇಶಿಕ ಸಾರಿಗೆ ಕಛೇರಿ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742153,
+      "nodes": [
+        5936153721,
+        5936153722,
+        5936153723,
+        5936153724,
+        5936153721
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Rayapur BRT Station",
+        "name:kn": "ಇಂಡಿಯನ್ ಆಯಿಲ್",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742154,
+      "nodes": [
+        5936153725,
+        5936153726,
+        5936153727,
+        5936153728,
+        5936153725
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "KMF1 BRT Station",
+        "name:kn": "ಎನ್ ಜಿ ಇ ಎಫ್",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742155,
+      "nodes": [
+        5936153729,
+        5936153730,
+        5936153731,
+        5936153732,
+        5936153729
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Navalur Railway BRT Station",
+        "name:kn": "ನವಲೂರು",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742156,
+      "nodes": [
+        5936153733,
+        5936153734,
+        5936153735,
+        5936153736,
+        5936153733
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Navanagar BRT Station",
+        "name:kn": "ನವನಗರ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742157,
+      "nodes": [
+        5936153737,
+        5936153738,
+        5936153739,
+        5936153740,
+        5936153737
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "APMC BRT Station",
+        "name:kn": "ಕೃಉಮಾಸ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742158,
+      "nodes": [
+        5936153742,
+        5936153743,
+        5936153744,
+        5936153745,
+        5936153742
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Shantinikethan BRT Station",
+        "name:kn": "ಶಾಂತಿನಿಕೇತನ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742159,
+      "nodes": [
+        5936153747,
+        5936153748,
+        5936153749,
+        5936153750,
+        5936153747
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Bairidevarakoppa BRT Station",
+        "name:kn": "ಬೈರದೇವರಕೊಪ್ಪ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628742160,
+      "nodes": [
+        5936153753,
+        5936153754,
+        5936153755,
+        5936153756,
+        5936153753
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Unkal Lake BRT Station",
+        "name:kn": "ಉಣಕಲ್ ಕೆರೆ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628771523,
+      "nodes": [
+        5936458566,
+        5936458567,
+        5936458568,
+        5936458569,
+        5936458566
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Vidyanagar BRT Station",
+        "name:kn": "ವಿದ್ಯಾನಗರ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628784687,
+      "nodes": [
+        5936633879,
+        5936633880,
+        5936633881,
+        5936633882,
+        5936633879
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Hosur Circle BRT Station",
+        "name:kn": "ಹೊಸೂರು ವೃತ್ತ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628784688,
+      "nodes": [
+        5936633883,
+        5936633884,
+        5936635385,
+        5936635386,
+        5936633883
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Hosur Interchange BRT Station",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628784689,
+      "nodes": [
+        5936635392,
+        5936635393,
+        5936635394,
+        5936635395,
+        5936635392
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "KIMS BRT Station",
+        "name:kn": "ಕರ್ನಾಟಕ ವೈದ್ಯಕೀಯ ವಿಜ್ಞಾನ ಸಂಸ್ಥೆ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628784690,
+      "nodes": [
+        5936635401,
+        5936635402,
+        5936635403,
+        5936635404,
+        5936635401
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "BVB College BRT Station",
+        "name:kn": "ಭೂಮರೆಡ್ಡಿ ಕಾಲೇಜು",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628784691,
+      "nodes": [
+        5936635405,
+        5936635406,
+        5936635407,
+        5936635408,
+        5936635405
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Unakal Cross BRT Station",
+        "name:kn": "ಪ್ರೇರಣ ಪದವಿ ಪೂರ್ವ ಕಾಲೇಜು",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628784695,
+      "nodes": [
+        5936635423,
+        5936635424,
+        5936635425,
+        5936635426,
+        5936635423
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "SDM Hospital BRT Station",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 628784696,
+      "nodes": [
+        5936635427,
+        5936635428,
+        5936635429,
+        5936635430,
+        5936635427
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Sattur BRT Station",
+        "name:kn": "ಸತ್ತೂರು",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 638210034,
+      "nodes": [
+        6015260481,
+        6015260482,
+        6015260483,
+        6015260484,
+        6015260481
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Unkal Village BRT Station",
+        "name:kn": "ಉಣಕಲ್ಲ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 638238144,
+      "nodes": [
+        6015459551,
+        6015459552,
+        6015459553,
+        6015459554,
+        6015459555,
+        6015459556,
+        6015459557,
+        6017558983,
+        6015459558,
+        6015459559,
+        6015459560,
+        6015459561,
+        6015459562,
+        6015459563,
+        6015459564,
+        6015459551
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "bus": "yes",
+        "name": "Dharwad BRTS Terminal",
+        "name:kn": "ಧಾರವಾಡ ಬಿಆರ್ಟಿಎಸ್",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 639035828,
+      "nodes": [
+        6021931523,
+        6021931524,
+        6021931525,
+        6021931526,
+        6021931523
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "platform",
+        "bus": "yes",
+        "name": "Jubilee Circle BRT Station",
+        "name:kn": "ಜುಬಿಲಿ ವೃತ್ತ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 639035829,
+      "nodes": [
+        6021931527,
+        6021931528,
+        6021931529,
+        6021931530,
+        6021931527
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Court Circle BRTC Station",
+        "name:kn": "ನ್ಯಾಯಾಲಯ ವೃತ್ತ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 649034268,
+      "nodes": [
+        6091994615,
+        6091994616,
+        6091994617,
+        6091994618,
+        6091994619,
+        6091994615
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "platform",
+        "bus": "yes",
+        "name": "NTTF BRT Station",
+        "name:kn": "ಎನ್‌ಟಿಟಿಎಫ್‌",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 649034269,
+      "nodes": [
+        6091994620,
+        6091994621,
+        6091994622,
+        6091994623,
+        6091994620
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Hosa Yallapura BRT Station",
+        "name:kn": "ಹೊಸ ಯಲ್ಲಾಪುರ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 649034270,
+      "nodes": [
+        6091994624,
+        6091994625,
+        6091994626,
+        6091994627,
+        6091994624
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Toll Naka BRT Station",
+        "name:kn": "ಟೋಲ್ ನಾಕ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 649034271,
+      "nodes": [
+        6091994628,
+        6091994629,
+        6091994630,
+        6091994631,
+        6091994628
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Vidyagiri BRT Station",
+        "name:kn": "ವಿದ್ಯಾಗಿರಿ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 649034272,
+      "nodes": [
+        6091994632,
+        6091994633,
+        6091994634,
+        6091994635,
+        6091994632
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Gandhinagar BRT Station",
+        "name:kn": "ಗಾಂಧಿನಗರ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 649034273,
+      "nodes": [
+        6091994636,
+        6091994637,
+        6091994638,
+        6091994639,
+        6091994636
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Lakamanahalli BRT Station",
+        "name:kn": "ಲಕಮನಹಳ್ಳಿ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 702653948,
+      "nodes": [
+        6598555848,
+        6598555849,
+        6598555866,
+        6598555867,
+        6598555850,
+        6598555851,
+        6598555864,
+        6598555860,
+        6598555859,
+        6598555862,
+        6598555848
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "HDBRTS Hubballi Depot",
+        "name:kn": "ಹುಬ್ಬಳ್ಳಿ ಬಿ ಅರ್ ಟಿ ಎಸ್ ಡೀಪೋ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 772696994,
+      "nodes": [
+        7213958504,
+        7213958505,
+        7213958506,
+        7213958507,
+        7213958504
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Hubballi Railway BRT Station",
+        "name:kn": "ಹುಬ್ಬಳ್ಳಿ",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 839307449,
+      "nodes": [
+        7832160856,
+        7832160857,
+        7832160858,
+        7832160859,
+        7832160856
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Hubli OCBS BRT Station",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 839309399,
+      "nodes": [
+        7832189641,
+        7832189642,
+        7832189643,
+        7832189644,
+        7832189641
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "HDMC BRT Station",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "way",
+      "id": 839309589,
+      "nodes": [
+        7832189424,
+        7832189425,
+        7832189426,
+        7832189427,
+        7832189424
+      ],
+      "tags": {
+        "amenity": "bus_station",
+        "building": "yes",
+        "bus": "yes",
+        "name": "Dr.Ambedkar BRT Station",
+        "public_transport": "station"
+      }
+    },
+    {
+      "type": "node",
+      "id": 5839510245,
+      "lat": 15.400775,
+      "lon": 75.0771384
+    },
+    {
+      "type": "node",
+      "id": 5839510246,
+      "lat": 15.4005345,
+      "lon": 75.0774871
+    },
+    {
+      "type": "node",
+      "id": 5839510247,
+      "lat": 15.400475,
+      "lon": 75.0774468
+    },
+    {
+      "type": "node",
+      "id": 5839510248,
+      "lat": 15.4007246,
+      "lon": 75.0771008
+    },
+    {
+      "type": "node",
+      "id": 5936635423,
+      "lat": 15.4173142,
+      "lon": 75.048229
+    },
+    {
+      "type": "node",
+      "id": 5936635424,
+      "lat": 15.4172767,
+      "lon": 75.0482183
+    },
+    {
+      "type": "node",
+      "id": 5936635427,
+      "lat": 15.4182596,
+      "lon": 75.042823
+    },
+    {
+      "type": "node",
+      "id": 5936635428,
+      "lat": 15.4182221,
+      "lon": 75.0428163
+    },
+    {
+      "type": "node",
+      "id": 5936635429,
+      "lat": 15.4183449,
+      "lon": 75.0422584
+    },
+    {
+      "type": "node",
+      "id": 5936635430,
+      "lat": 15.4183863,
+      "lon": 75.0422718
+    },
+    {
+      "type": "node",
+      "id": 5936635425,
+      "lat": 15.4174616,
+      "lon": 75.0477047
+    },
+    {
+      "type": "node",
+      "id": 5936635426,
+      "lat": 15.4175004,
+      "lon": 75.0477221
+    },
+    {
+      "type": "node",
+      "id": 5936153721,
+      "lat": 15.4068269,
+      "lon": 75.064872
+    },
+    {
+      "type": "node",
+      "id": 5936153724,
+      "lat": 15.40677,
+      "lon": 75.0648371
+    },
+    {
+      "type": "node",
+      "id": 5936153725,
+      "lat": 15.4094874,
+      "lon": 75.0606059
+    },
+    {
+      "type": "node",
+      "id": 5936153726,
+      "lat": 15.4095274,
+      "lon": 75.0606582
+    },
+    {
+      "type": "node",
+      "id": 5936153727,
+      "lat": 15.409212,
+      "lon": 75.0608929
+    },
+    {
+      "type": "node",
+      "id": 5936153728,
+      "lat": 15.4091706,
+      "lon": 75.0608366
+    },
+    {
+      "type": "node",
+      "id": 5936153729,
+      "lat": 15.4152607,
+      "lon": 75.0536764
+    },
+    {
+      "type": "node",
+      "id": 5936153730,
+      "lat": 15.415112,
+      "lon": 75.0540412
+    },
+    {
+      "type": "node",
+      "id": 5936153731,
+      "lat": 15.41505,
+      "lon": 75.0540157
+    },
+    {
+      "type": "node",
+      "id": 5936153732,
+      "lat": 15.4151999,
+      "lon": 75.0536456
+    },
+    {
+      "type": "node",
+      "id": 5839510240,
+      "lat": 15.4048568,
+      "lon": 75.0698508
+    },
+    {
+      "type": "node",
+      "id": 5839510241,
+      "lat": 15.4046887,
+      "lon": 75.0702009
+    },
+    {
+      "type": "node",
+      "id": 5839510242,
+      "lat": 15.404628,
+      "lon": 75.0701713
+    },
+    {
+      "type": "node",
+      "id": 5839510243,
+      "lat": 15.4047999,
+      "lon": 75.0698133
+    },
+    {
+      "type": "node",
+      "id": 5936153722,
+      "lat": 15.4066601,
+      "lon": 75.065214
+    },
+    {
+      "type": "node",
+      "id": 5936153723,
+      "lat": 15.4065967,
+      "lon": 75.0651845
+    },
+    {
+      "type": "node",
+      "id": 6091994636,
+      "lat": 15.4328119,
+      "lon": 75.02512
+    },
+    {
+      "type": "node",
+      "id": 6091994637,
+      "lat": 15.4327611,
+      "lon": 75.0250802
+    },
+    {
+      "type": "node",
+      "id": 6091994638,
+      "lat": 15.4330102,
+      "lon": 75.0247378
+    },
+    {
+      "type": "node",
+      "id": 6091994639,
+      "lat": 15.4330609,
+      "lon": 75.0247775
+    },
+    {
+      "type": "node",
+      "id": 6091994628,
+      "lat": 15.4410203,
+      "lon": 75.0166402
+    },
+    {
+      "type": "node",
+      "id": 6091994629,
+      "lat": 15.441046,
+      "lon": 75.0166645
+    },
+    {
+      "type": "node",
+      "id": 6091994630,
+      "lat": 15.4406785,
+      "lon": 75.0170811
+    },
+    {
+      "type": "node",
+      "id": 6091994631,
+      "lat": 15.4406529,
+      "lon": 75.0170569
+    },
+    {
+      "type": "node",
+      "id": 6091994632,
+      "lat": 15.4379517,
+      "lon": 75.0190593
+    },
+    {
+      "type": "node",
+      "id": 6091994633,
+      "lat": 15.437974,
+      "lon": 75.0190966
+    },
+    {
+      "type": "node",
+      "id": 6091994634,
+      "lat": 15.437619,
+      "lon": 75.0193248
+    },
+    {
+      "type": "node",
+      "id": 6091994635,
+      "lat": 15.4375967,
+      "lon": 75.0192874
+    },
+    {
+      "type": "node",
+      "id": 6091994620,
+      "lat": 15.4499468,
+      "lon": 75.01109
+    },
+    {
+      "type": "node",
+      "id": 6091994621,
+      "lat": 15.4499669,
+      "lon": 75.0111426
+    },
+    {
+      "type": "node",
+      "id": 6091994622,
+      "lat": 15.4494584,
+      "lon": 75.0113519
+    },
+    {
+      "type": "node",
+      "id": 6091994623,
+      "lat": 15.4494383,
+      "lon": 75.0112993
+    },
+    {
+      "type": "node",
+      "id": 6021931527,
+      "lat": 15.4558899,
+      "lon": 75.0069411
+    },
+    {
+      "type": "node",
+      "id": 6021931528,
+      "lat": 15.4559013,
+      "lon": 75.0069963
+    },
+    {
+      "type": "node",
+      "id": 6021931529,
+      "lat": 15.4553942,
+      "lon": 75.0071094
+    },
+    {
+      "type": "node",
+      "id": 6021931530,
+      "lat": 15.4553828,
+      "lon": 75.0070543
+    },
+    {
+      "type": "node",
+      "id": 6091994615,
+      "lat": 15.4538496,
+      "lon": 75.008854
+    },
+    {
+      "type": "node",
+      "id": 6091994616,
+      "lat": 15.453807,
+      "lon": 75.0088164
+    },
+    {
+      "type": "node",
+      "id": 6091994617,
+      "lat": 15.453688,
+      "lon": 75.0089854
+    },
+    {
+      "type": "node",
+      "id": 6091994618,
+      "lat": 15.4533661,
+      "lon": 75.0094146
+    },
+    {
+      "type": "node",
+      "id": 6091994619,
+      "lat": 15.4534011,
+      "lon": 75.0094427
+    },
+    {
+      "type": "node",
+      "id": 6091994624,
+      "lat": 15.4463183,
+      "lon": 75.0125516
+    },
+    {
+      "type": "node",
+      "id": 6091994625,
+      "lat": 15.4463386,
+      "lon": 75.0125945
+    },
+    {
+      "type": "node",
+      "id": 6091994626,
+      "lat": 15.4458509,
+      "lon": 75.0128428
+    },
+    {
+      "type": "node",
+      "id": 6091994627,
+      "lat": 15.4458307,
+      "lon": 75.0127999
+    },
+    {
+      "type": "node",
+      "id": 2315624551,
+      "lat": 15.4593864,
+      "lon": 75.0104855
+    },
+    {
+      "type": "node",
+      "id": 2315624552,
+      "lat": 15.459888,
+      "lon": 75.0109815
+    },
+    {
+      "type": "node",
+      "id": 2315624553,
+      "lat": 15.4596706,
+      "lon": 75.011355
+    },
+    {
+      "type": "node",
+      "id": 2315624554,
+      "lat": 15.4601352,
+      "lon": 75.0102298
+    },
+    {
+      "type": "node",
+      "id": 2315624555,
+      "lat": 15.4590674,
+      "lon": 75.0112152
+    },
+    {
+      "type": "node",
+      "id": 2315626643,
+      "lat": 15.4610323,
+      "lon": 75.0118268
+    },
+    {
+      "type": "node",
+      "id": 2315626644,
+      "lat": 15.4604523,
+      "lon": 75.0114009
+    },
+    {
+      "type": "node",
+      "id": 2315626645,
+      "lat": 15.4606962,
+      "lon": 75.0113332
+    },
+    {
+      "type": "node",
+      "id": 2315626646,
+      "lat": 15.4605021,
+      "lon": 75.0119284
+    },
+    {
+      "type": "node",
+      "id": 6015459551,
+      "lat": 15.4601996,
+      "lon": 75.0090443
+    },
+    {
+      "type": "node",
+      "id": 6015459552,
+      "lat": 15.4604063,
+      "lon": 75.0090845
+    },
+    {
+      "type": "node",
+      "id": 6015459553,
+      "lat": 15.4604891,
+      "lon": 75.0092146
+    },
+    {
+      "type": "node",
+      "id": 6015459554,
+      "lat": 15.4604904,
+      "lon": 75.0093514
+    },
+    {
+      "type": "node",
+      "id": 6015459555,
+      "lat": 15.4604335,
+      "lon": 75.0095498
+    },
+    {
+      "type": "node",
+      "id": 6015459556,
+      "lat": 15.4603611,
+      "lon": 75.0097121
+    },
+    {
+      "type": "node",
+      "id": 6015459557,
+      "lat": 15.4602035,
+      "lon": 75.0098127
+    },
+    {
+      "type": "node",
+      "id": 6015459558,
+      "lat": 15.4600975,
+      "lon": 75.0097551
+    },
+    {
+      "type": "node",
+      "id": 6015459559,
+      "lat": 15.4600444,
+      "lon": 75.0096746
+    },
+    {
+      "type": "node",
+      "id": 6015459560,
+      "lat": 15.4599889,
+      "lon": 75.0095794
+    },
+    {
+      "type": "node",
+      "id": 6015459561,
+      "lat": 15.4599346,
+      "lon": 75.0094519
+    },
+    {
+      "type": "node",
+      "id": 6015459562,
+      "lat": 15.4598868,
+      "lon": 75.0093594
+    },
+    {
+      "type": "node",
+      "id": 6015459563,
+      "lat": 15.4598467,
+      "lon": 75.0092897
+    },
+    {
+      "type": "node",
+      "id": 6015459564,
+      "lat": 15.4598298,
+      "lon": 75.0092588
+    },
+    {
+      "type": "node",
+      "id": 6017558983,
+      "lat": 15.4601434,
+      "lon": 75.009804
+    },
+    {
+      "type": "node",
+      "id": 6021931523,
+      "lat": 15.4584164,
+      "lon": 75.0075946
+    },
+    {
+      "type": "node",
+      "id": 6021931524,
+      "lat": 15.4583972,
+      "lon": 75.0076603
+    },
+    {
+      "type": "node",
+      "id": 6021931525,
+      "lat": 15.4576997,
+      "lon": 75.007385
+    },
+    {
+      "type": "node",
+      "id": 6021931526,
+      "lat": 15.4577253,
+      "lon": 75.007322
+    },
+    {
+      "type": "node",
+      "id": 6598555848,
+      "lat": 15.3500473,
+      "lon": 75.1174567
+    },
+    {
+      "type": "node",
+      "id": 6598555849,
+      "lat": 15.3501611,
+      "lon": 75.1183901
+    },
+    {
+      "type": "node",
+      "id": 6598555850,
+      "lat": 15.3481046,
+      "lon": 75.1187224
+    },
+    {
+      "type": "node",
+      "id": 6598555851,
+      "lat": 15.347993,
+      "lon": 75.1177756
+    },
+    {
+      "type": "node",
+      "id": 6598555859,
+      "lat": 15.3490088,
+      "lon": 75.117623
+    },
+    {
+      "type": "node",
+      "id": 6598555860,
+      "lat": 15.3484947,
+      "lon": 75.1176928
+    },
+    {
+      "type": "node",
+      "id": 6598555862,
+      "lat": 15.3498732,
+      "lon": 75.1174846
+    },
+    {
+      "type": "node",
+      "id": 6598555864,
+      "lat": 15.3481969,
+      "lon": 75.1177604
+    },
+    {
+      "type": "node",
+      "id": 6598555866,
+      "lat": 15.3491226,
+      "lon": 75.1185725
+    },
+    {
+      "type": "node",
+      "id": 6598555867,
+      "lat": 15.3485723,
+      "lon": 75.1186664
+    },
+    {
+      "type": "node",
+      "id": 3591685296,
+      "lat": 15.3551135,
+      "lon": 75.1270184
+    },
+    {
+      "type": "node",
+      "id": 3591685300,
+      "lat": 15.3565244,
+      "lon": 75.1291454
+    },
+    {
+      "type": "node",
+      "id": 3591685303,
+      "lat": 15.3550225,
+      "lon": 75.1286427
+    },
+    {
+      "type": "node",
+      "id": 3591685304,
+      "lat": 15.3555526,
+      "lon": 75.1286637
+    },
+    {
+      "type": "node",
+      "id": 3591685305,
+      "lat": 15.3569079,
+      "lon": 75.1279663
+    },
+    {
+      "type": "node",
+      "id": 3591685309,
+      "lat": 15.3556928,
+      "lon": 75.1266322
+    },
+    {
+      "type": "node",
+      "id": 3591685310,
+      "lat": 15.3570838,
+      "lon": 75.1285564
+    },
+    {
+      "type": "node",
+      "id": 3591685314,
+      "lat": 15.3568045,
+      "lon": 75.1267969
+    },
+    {
+      "type": "node",
+      "id": 3591685316,
+      "lat": 15.3564734,
+      "lon": 75.1260244
+    },
+    {
+      "type": "node",
+      "id": 3591685318,
+      "lat": 15.3545284,
+      "lon": 75.1273548
+    },
+    {
+      "type": "node",
+      "id": 3591685322,
+      "lat": 15.3560596,
+      "lon": 75.1284062
+    },
+    {
+      "type": "node",
+      "id": 3591685323,
+      "lat": 15.3568148,
+      "lon": 75.1272582
+    },
+    {
+      "type": "node",
+      "id": 3591685325,
+      "lat": 15.3571691,
+      "lon": 75.1288112
+    },
+    {
+      "type": "node",
+      "id": 5936633879,
+      "lat": 15.3549373,
+      "lon": 75.1303221
+    },
+    {
+      "type": "node",
+      "id": 5936633880,
+      "lat": 15.3549632,
+      "lon": 75.130369
+    },
+    {
+      "type": "node",
+      "id": 5936633883,
+      "lat": 15.3574695,
+      "lon": 75.1287731
+    },
+    {
+      "type": "node",
+      "id": 5936633884,
+      "lat": 15.3574979,
+      "lon": 75.1288241
+    },
+    {
+      "type": "node",
+      "id": 5936635385,
+      "lat": 15.3570634,
+      "lon": 75.1291017
+    },
+    {
+      "type": "node",
+      "id": 5936635386,
+      "lat": 15.3570324,
+      "lon": 75.129044
+    },
+    {
+      "type": "node",
+      "id": 5936458566,
+      "lat": 15.3641335,
+      "lon": 75.1246835
+    },
+    {
+      "type": "node",
+      "id": 5936458567,
+      "lat": 15.3641775,
+      "lon": 75.1247291
+    },
+    {
+      "type": "node",
+      "id": 5936458568,
+      "lat": 15.363871,
+      "lon": 75.125051
+    },
+    {
+      "type": "node",
+      "id": 5936458569,
+      "lat": 15.3638258,
+      "lon": 75.1250027
+    },
+    {
+      "type": "node",
+      "id": 5936635392,
+      "lat": 15.3604321,
+      "lon": 75.12699
+    },
+    {
+      "type": "node",
+      "id": 5936635393,
+      "lat": 15.3604632,
+      "lon": 75.1270396
+    },
+    {
+      "type": "node",
+      "id": 5936635394,
+      "lat": 15.359986,
+      "lon": 75.1273091
+    },
+    {
+      "type": "node",
+      "id": 5936635395,
+      "lat": 15.3599575,
+      "lon": 75.1272488
+    },
+    {
+      "type": "node",
+      "id": 6015260481,
+      "lat": 15.3758015,
+      "lon": 75.114004
+    },
+    {
+      "type": "node",
+      "id": 6015260482,
+      "lat": 15.3758274,
+      "lon": 75.1140523
+    },
+    {
+      "type": "node",
+      "id": 6015260483,
+      "lat": 15.3754886,
+      "lon": 75.1142816
+    },
+    {
+      "type": "node",
+      "id": 6015260484,
+      "lat": 15.3754627,
+      "lon": 75.1142226
+    },
+    {
+      "type": "node",
+      "id": 5936635401,
+      "lat": 15.3678008,
+      "lon": 75.1209719
+    },
+    {
+      "type": "node",
+      "id": 5936635402,
+      "lat": 15.3678396,
+      "lon": 75.1210135
+    },
+    {
+      "type": "node",
+      "id": 5936635403,
+      "lat": 15.3674387,
+      "lon": 75.1213984
+    },
+    {
+      "type": "node",
+      "id": 5936635404,
+      "lat": 15.3673895,
+      "lon": 75.1213434
+    },
+    {
+      "type": "node",
+      "id": 5936635405,
+      "lat": 15.3702733,
+      "lon": 75.1187027
+    },
+    {
+      "type": "node",
+      "id": 5936635406,
+      "lat": 15.3703133,
+      "lon": 75.1187497
+    },
+    {
+      "type": "node",
+      "id": 5936635407,
+      "lat": 15.3699965,
+      "lon": 75.1190474
+    },
+    {
+      "type": "node",
+      "id": 5936635408,
+      "lat": 15.36995,
+      "lon": 75.1189911
+    },
+    {
+      "type": "node",
+      "id": 1124599584,
+      "lat": 15.3504881,
+      "lon": 75.1369489
+    },
+    {
+      "type": "node",
+      "id": 1124599603,
+      "lat": 15.3498294,
+      "lon": 75.1358864
+    },
+    {
+      "type": "node",
+      "id": 1124599610,
+      "lat": 15.3504103,
+      "lon": 75.1353884
+    },
+    {
+      "type": "node",
+      "id": 1124599629,
+      "lat": 15.3502777,
+      "lon": 75.136669
+    },
+    {
+      "type": "node",
+      "id": 1124599636,
+      "lat": 15.3497334,
+      "lon": 75.135526
+    },
+    {
+      "type": "node",
+      "id": 1124599651,
+      "lat": 15.3507243,
+      "lon": 75.1353805
+    },
+    {
+      "type": "node",
+      "id": 1124599663,
+      "lat": 15.3500947,
+      "lon": 75.1363892
+    },
+    {
+      "type": "node",
+      "id": 1124599670,
+      "lat": 15.3510141,
+      "lon": 75.1361426
+    },
+    {
+      "type": "node",
+      "id": 1124599672,
+      "lat": 15.3497242,
+      "lon": 75.1354216
+    },
+    {
+      "type": "node",
+      "id": 1124599682,
+      "lat": 15.3508897,
+      "lon": 75.1357928
+    },
+    {
+      "type": "node",
+      "id": 1741083593,
+      "lat": 15.3509939,
+      "lon": 75.1360952
+    },
+    {
+      "type": "node",
+      "id": 1741083638,
+      "lat": 15.3509677,
+      "lon": 75.1360276
+    },
+    {
+      "type": "node",
+      "id": 7832160856,
+      "lat": 15.3510605,
+      "lon": 75.1364488
+    },
+    {
+      "type": "node",
+      "id": 7832160857,
+      "lat": 15.3509855,
+      "lon": 75.1364005
+    },
+    {
+      "type": "node",
+      "id": 7832160858,
+      "lat": 15.3512545,
+      "lon": 75.1360706
+    },
+    {
+      "type": "node",
+      "id": 7832160859,
+      "lat": 15.3513114,
+      "lon": 75.1361323
+    },
+    {
+      "type": "node",
+      "id": 7832189641,
+      "lat": 15.3508057,
+      "lon": 75.140456
+    },
+    {
+      "type": "node",
+      "id": 7832189642,
+      "lat": 15.3507643,
+      "lon": 75.1404748
+    },
+    {
+      "type": "node",
+      "id": 7832189643,
+      "lat": 15.3509131,
+      "lon": 75.1409468
+    },
+    {
+      "type": "node",
+      "id": 7832189644,
+      "lat": 15.3509544,
+      "lon": 75.1409214
+    },
+    {
+      "type": "node",
+      "id": 1375421066,
+      "lat": 15.3443191,
+      "lon": 75.1457367
+    },
+    {
+      "type": "node",
+      "id": 1375421068,
+      "lat": 15.3450354,
+      "lon": 75.1451156
+    },
+    {
+      "type": "node",
+      "id": 1375421073,
+      "lat": 15.3441614,
+      "lon": 75.1452572
+    },
+    {
+      "type": "node",
+      "id": 1375421074,
+      "lat": 15.345113,
+      "lon": 75.145598
+    },
+    {
+      "type": "node",
+      "id": 1375421078,
+      "lat": 15.3450753,
+      "lon": 75.1453823
+    },
+    {
+      "type": "node",
+      "id": 4030805769,
+      "lat": 15.3449034,
+      "lon": 75.1450937
+    },
+    {
+      "type": "node",
+      "id": 7860691255,
+      "lat": 15.3449656,
+      "lon": 75.1450938
+    },
+    {
+      "type": "node",
+      "id": 7213958504,
+      "lat": 15.3495483,
+      "lon": 75.1482296
+    },
+    {
+      "type": "node",
+      "id": 7213958505,
+      "lat": 15.3496471,
+      "lon": 75.1486392
+    },
+    {
+      "type": "node",
+      "id": 7213958506,
+      "lat": 15.349521,
+      "lon": 75.1486707
+    },
+    {
+      "type": "node",
+      "id": 7213958507,
+      "lat": 15.3494268,
+      "lon": 75.148258
+    },
+    {
+      "type": "node",
+      "id": 1741077386,
+      "lat": 15.3529449,
+      "lon": 75.1329138
+    },
+    {
+      "type": "node",
+      "id": 1741077415,
+      "lat": 15.3532191,
+      "lon": 75.1324369
+    },
+    {
+      "type": "node",
+      "id": 1741077422,
+      "lat": 15.353007,
+      "lon": 75.1329572
+    },
+    {
+      "type": "node",
+      "id": 1741077467,
+      "lat": 15.3531642,
+      "lon": 75.1324005
+    },
+    {
+      "type": "node",
+      "id": 3920724905,
+      "lat": 15.3527804,
+      "lon": 75.1350167
+    },
+    {
+      "type": "node",
+      "id": 3920724918,
+      "lat": 15.3535817,
+      "lon": 75.1358039
+    },
+    {
+      "type": "node",
+      "id": 3920724925,
+      "lat": 15.3527119,
+      "lon": 75.1349604
+    },
+    {
+      "type": "node",
+      "id": 3920724926,
+      "lat": 15.3526195,
+      "lon": 75.1351028
+    },
+    {
+      "type": "node",
+      "id": 3920724928,
+      "lat": 15.3533593,
+      "lon": 75.1360346
+    },
+    {
+      "type": "node",
+      "id": 3920724930,
+      "lat": 15.3528733,
+      "lon": 75.1349049
+    },
+    {
+      "type": "node",
+      "id": 3920724933,
+      "lat": 15.3537007,
+      "lon": 75.1359219
+    },
+    {
+      "type": "node",
+      "id": 3920724934,
+      "lat": 15.3537051,
+      "lon": 75.1356521
+    },
+    {
+      "type": "node",
+      "id": 5936633881,
+      "lat": 15.3545817,
+      "lon": 75.1305903
+    },
+    {
+      "type": "node",
+      "id": 5936633882,
+      "lat": 15.3545545,
+      "lon": 75.130534
+    },
+    {
+      "type": "node",
+      "id": 7832189424,
+      "lat": 15.3528397,
+      "lon": 75.1451746
+    },
+    {
+      "type": "node",
+      "id": 7832189425,
+      "lat": 15.3528112,
+      "lon": 75.1451894
+    },
+    {
+      "type": "node",
+      "id": 7832189426,
+      "lat": 15.3529354,
+      "lon": 75.1456024
+    },
+    {
+      "type": "node",
+      "id": 7832189427,
+      "lat": 15.3529664,
+      "lon": 75.145581
+    },
+    {
+      "type": "node",
+      "id": 5936153733,
+      "lat": 15.3972853,
+      "lon": 75.0822889
+    },
+    {
+      "type": "node",
+      "id": 5936153734,
+      "lat": 15.3973383,
+      "lon": 75.0823278
+    },
+    {
+      "type": "node",
+      "id": 5936153735,
+      "lat": 15.3970177,
+      "lon": 75.0827972
+    },
+    {
+      "type": "node",
+      "id": 5936153736,
+      "lat": 15.3969608,
+      "lon": 75.0827489
+    },
+    {
+      "type": "node",
+      "id": 5936153737,
+      "lat": 15.3937497,
+      "lon": 75.0919744
+    },
+    {
+      "type": "node",
+      "id": 5936153738,
+      "lat": 15.3936604,
+      "lon": 75.0923539
+    },
+    {
+      "type": "node",
+      "id": 5936153739,
+      "lat": 15.3935893,
+      "lon": 75.0923418
+    },
+    {
+      "type": "node",
+      "id": 5936153740,
+      "lat": 15.3936824,
+      "lon": 75.0919542
+    },
+    {
+      "type": "node",
+      "id": 5936153742,
+      "lat": 15.3914074,
+      "lon": 75.0979597
+    },
+    {
+      "type": "node",
+      "id": 5936153743,
+      "lat": 15.3912341,
+      "lon": 75.0983191
+    },
+    {
+      "type": "node",
+      "id": 5936153744,
+      "lat": 15.3913052,
+      "lon": 75.0983553
+    },
+    {
+      "type": "node",
+      "id": 5936153745,
+      "lat": 15.3914707,
+      "lon": 75.0979906
+    },
+    {
+      "type": "node",
+      "id": 5936153753,
+      "lat": 15.3824037,
+      "lon": 75.1116303
+    },
+    {
+      "type": "node",
+      "id": 5936153754,
+      "lat": 15.3823662,
+      "lon": 75.1116215
+    },
+    {
+      "type": "node",
+      "id": 5936153755,
+      "lat": 15.3822537,
+      "lon": 75.1121318
+    },
+    {
+      "type": "node",
+      "id": 5936153756,
+      "lat": 15.3822976,
+      "lon": 75.1121379
+    },
+    {
+      "type": "node",
+      "id": 5936153747,
+      "lat": 15.3871921,
+      "lon": 75.1052204
+    },
+    {
+      "type": "node",
+      "id": 5936153748,
+      "lat": 15.38694,
+      "lon": 75.1055852
+    },
+    {
+      "type": "node",
+      "id": 5936153749,
+      "lat": 15.3868754,
+      "lon": 75.1055396
+    },
+    {
+      "type": "node",
+      "id": 5936153750,
+      "lat": 15.3871391,
+      "lon": 75.1051775
+    }
+  ]
+}
