@@ -155,6 +155,70 @@ if (window.ResizeObserver) {
   new ResizeObserver(() => map.invalidateSize()).observe(document.querySelector(".map-pane"));
 }
 
+// ---------------------------------------------------------------------------
+// Side-panel resize handle — drag to stretch the panel/map split,
+// double-click to reset. Persisted per-browser via localStorage.
+// ---------------------------------------------------------------------------
+(function setupPanelResize() {
+  const panel = document.getElementById("side-panel");
+  const handle = document.getElementById("panel-resize-handle");
+  const mainRow = document.querySelector(".main-row");
+  if (!panel || !handle || !mainRow) return;
+
+  const STORAGE_KEY = "geojson-editor-panel-width-px";
+  try {
+    const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+    if (saved) panel.style.width = saved + "px";
+  } catch (err) {
+    /* localStorage unavailable (private browsing, etc.) — just use the default width */
+  }
+
+  function clamp(px) {
+    const min = 280;
+    const max = Math.max(min, window.innerWidth - 320); // always leave the map at least ~320px
+    return Math.max(min, Math.min(max, px));
+  }
+
+  let dragging = false;
+
+  handle.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    handle.classList.add("dragging");
+    handle.setPointerCapture(e.pointerId);
+    document.body.style.userSelect = "none";
+  });
+
+  handle.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const px = clamp(e.clientX - mainRow.getBoundingClientRect().left);
+    panel.style.width = px + "px";
+    map.invalidateSize();
+  });
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove("dragging");
+    document.body.style.userSelect = "";
+    try {
+      localStorage.setItem(STORAGE_KEY, parseInt(panel.style.width, 10));
+    } catch (err) {
+      /* ignore — resizing still works, it just won't persist across reloads */
+    }
+    map.invalidateSize();
+  }
+  handle.addEventListener("pointerup", endDrag);
+  handle.addEventListener("pointercancel", endDrag);
+
+  handle.addEventListener("dblclick", () => {
+    panel.style.width = "";
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (err) { /* ignore */ }
+    map.invalidateSize();
+  });
+})();
+
 map.pm.addControls({
   position: "topleft",
   drawMarker: true,
@@ -350,19 +414,69 @@ function handleDeleteArea(areaLayer) {
 }
 
 // ---------------------------------------------------------------------------
-// View JSON modal — shows everything currently loaded, and dims the map
-// behind it while open.
+// View JSON modal — shows (and lets you edit) everything currently loaded,
+// and dims the map behind it while open.
 // ---------------------------------------------------------------------------
 const jsonModalEl = document.getElementById("json-modal");
+const jsonModalTextEl = document.getElementById("json-modal-content");
+const jsonModalErrorEl = document.getElementById("json-modal-error");
+
+function showJsonModalError(msg) {
+  jsonModalErrorEl.textContent = msg;
+  jsonModalErrorEl.classList.toggle("visible", !!msg);
+}
+
 document.getElementById("view-json-btn").addEventListener("click", () => {
   const allLayers = new Set(editLayer.getLayers());
   sourceLayers.forEach((layers) => layers.forEach((lyr) => allLayers.add(lyr)));
   const geojson = L.featureGroup([...allLayers]).toGeoJSON();
-  document.getElementById("json-modal-content").textContent = JSON.stringify(geojson, null, 2);
+  jsonModalTextEl.value = JSON.stringify(geojson, null, 2);
+  showJsonModalError("");
   jsonModalEl.classList.add("open");
 });
+
 document.getElementById("json-modal-close").addEventListener("click", () => jsonModalEl.classList.remove("open"));
 jsonModalEl.querySelector(".json-modal-backdrop").addEventListener("click", () => jsonModalEl.classList.remove("open"));
+
+document.getElementById("json-modal-apply").addEventListener("click", () => {
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonModalTextEl.value);
+  } catch (err) {
+    showJsonModalError("Couldn't parse this as JSON: " + err.message);
+    return;
+  }
+  if (!parsed || typeof parsed !== "object" || (!parsed.type && !Array.isArray(parsed))) {
+    showJsonModalError("This doesn't look like valid GeoJSON (expected an object with a \"type\").");
+    return;
+  }
+
+  // Replace everything on the map with this edited version, as one fresh
+  // source — same as "Clear all" followed by loading one new file.
+  editLayer.clearLayers();
+  fileSources.clear();
+  sourcesInfo.clear();
+  sourceLayers.clear();
+  paletteIndex = 0;
+  selectFeature(null);
+
+  let count;
+  try {
+    count = registerFileSource("edited-json:" + Date.now(), "Edited JSON", parsed);
+  } catch (err) {
+    showJsonModalError("Valid JSON, but couldn't load it as GeoJSON: " + err.message);
+    return;
+  }
+
+  updateBadge();
+  renderLayersPanel();
+  maybeSetExportDefault();
+  fitToData();
+  renderFileList(getFilteredRepoFiles()); // nothing from the repo list is "loaded" anymore
+  showJsonModalError("");
+  jsonModalEl.classList.remove("open");
+  log(`Applied edited JSON to the map — ${count} feature(s) loaded.`, "ok");
+});
 
 // ---------------------------------------------------------------------------
 // Continue an existing line: draw more points that get appended onto a
