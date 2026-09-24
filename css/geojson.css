@@ -251,12 +251,20 @@ html, body.editor-body {
 .layer-row.layer-hidden { opacity: 0.55; }
 
 .layer-swatch {
-  width: 11px;
-  height: 11px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   flex: 0 0 auto;
   border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
 }
+.layer-swatch::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+.layer-swatch::-webkit-color-swatch { border: none; border-radius: 50%; }
+.layer-swatch::-moz-color-swatch { border: none; border-radius: 50%; }
 
 .layer-main {
   flex: 1 1 auto;
@@ -372,4 +380,101 @@ button.run-btn.secondary:hover { background: var(--bg-raised); }
   .main-row { flex-direction: column; }
   .side-panel { width: 100%; max-width: none; max-height: 45vh; border-right: none; border-bottom: 1px solid var(--rule); }
   .map-pane { flex: 1 1 auto; }
+}
+
+/* --- Delete-within-area tool --- */
+.delete-tool-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#delete-scope {
+  flex: 1 1 140px;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* --- Per-feature color control in the properties panel --- */
+.props-style-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.props-style-row input[type="color"] {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+}
+
+/* --- View JSON modal (dims the map behind it) --- */
+.json-modal {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+}
+.json-modal.open { display: block; }
+
+.json-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 18, 14, 0.55);
+  backdrop-filter: blur(1px);
+}
+
+.json-modal-panel {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  right: 5%;
+  bottom: 5%;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.json-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  flex: 0 0 auto;
+}
+
+#json-modal-content {
+  margin: 0;
+  padding: 14px;
+  overflow: auto;
+  flex: 1 1 auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  white-space: pre;
 }
