@@ -364,6 +364,47 @@ document.getElementById("view-json-btn").addEventListener("click", () => {
 document.getElementById("json-modal-close").addEventListener("click", () => jsonModalEl.classList.remove("open"));
 jsonModalEl.querySelector(".json-modal-backdrop").addEventListener("click", () => jsonModalEl.classList.remove("open"));
 
+// ---------------------------------------------------------------------------
+// Continue an existing line: draw more points that get appended onto a
+// selected line's end, instead of creating a brand-new separate feature.
+// ---------------------------------------------------------------------------
+let continueTargetLayer = null;
+
+function startContinueLine(layer) {
+  continueTargetLayer = layer;
+  const style = layer._baseStyle || LINE_STYLE;
+  map.pm.enableDraw("Line", {
+    templineStyle: { color: style.color },
+    hintlineStyle: { color: style.color, dashArray: [6, 6] },
+    pathOptions: style,
+  });
+  log("Draw the continuation, starting as close as you can to the line's end — it'll be merged in when you finish.", "info");
+}
+
+function mergeIntoLine(targetLayer, newLayer) {
+  const existing = targetLayer.getLatLngs();
+  const added = newLayer.getLatLngs();
+  newLayer.remove(); // this was only ever a temporary draw, never real data
+
+  // If the new line's first point lands almost exactly on the target's last
+  // point (likely, since you're drawing from its end), drop the duplicate
+  // so it doesn't leave a zero-length segment.
+  const last = existing[existing.length - 1];
+  const toAppend = last && added.length && last.distanceTo(added[0]) < 1 ? added.slice(1) : added;
+
+  targetLayer.setLatLngs(existing.concat(toAppend));
+  selectFeature(targetLayer); // refreshes the props panel + focus highlight
+  log(`Extended the line with ${toAppend.length} new point(s).`, "ok");
+}
+
+// Safety net: if the user presses Escape / right-clicks to cancel a draw
+// instead of finishing it, make sure a one-shot mode doesn't linger and
+// silently hijack the next unrelated draw.
+map.on("pm:drawend", () => {
+  deleteAreaPending = false;
+  continueTargetLayer = null;
+});
+
 document.getElementById("clear-all-btn").addEventListener("click", () => {
   editLayer.clearLayers();
   fileSources.clear();
@@ -382,6 +423,12 @@ map.on("pm:create", (e) => {
   if (deleteAreaPending && e.shape === "Polygon") {
     deleteAreaPending = false;
     handleDeleteArea(e.layer);
+    return;
+  }
+
+  if (continueTargetLayer && e.shape === "Line") {
+    mergeIntoLine(continueTargetLayer, e.layer);
+    continueTargetLayer = null;
     return;
   }
 
@@ -820,6 +867,18 @@ function renderPropsPanel(layer) {
   styleRow.appendChild(document.createTextNode("Color "));
   styleRow.appendChild(colorInput);
   propsPanelEl.appendChild(styleRow);
+
+  // Only lines (not polygons — L.Polygon extends L.Polyline in Leaflet, so
+  // exclude it explicitly) can be extended this way.
+  if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+    const continueBtn = document.createElement("button");
+    continueBtn.className = "run-btn secondary";
+    continueBtn.textContent = "+ Continue this line";
+    continueBtn.style.marginBottom = "12px";
+    continueBtn.title = "Draw more points that get appended to the end of this line, instead of creating a separate line";
+    continueBtn.addEventListener("click", () => startContinueLine(layer));
+    propsPanelEl.appendChild(continueBtn);
+  }
 
   const props = layer.feature.properties || {};
 
