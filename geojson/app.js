@@ -271,6 +271,73 @@ function fitToData() {
 }
 document.getElementById("fit-all-btn").addEventListener("click", fitToData);
 
+// ---------------------------------------------------------------------------
+// Delete-within-an-area tool: draw a free-form polygon, then remove every
+// feature (from the chosen scope — one layer, or everything) that falls
+// inside or touches it. Uses turf.js for the intersection test.
+// ---------------------------------------------------------------------------
+let deleteAreaPending = false;
+
+document.getElementById("delete-area-btn").addEventListener("click", () => {
+  if (deleteAreaPending) return;
+  if (typeof turf === "undefined") {
+    log("Delete-area tool needs turf.js, which didn't load (check your network/ad-blocker).", "bad");
+    return;
+  }
+  deleteAreaPending = true;
+  map.pm.enableDraw("Polygon", {
+    templineStyle: { color: "#b0432e" },
+    hintlineStyle: { color: "#b0432e", dashArray: [6, 6] },
+    pathOptions: { color: "#b0432e", fillColor: "#b0432e", fillOpacity: 0.15 },
+  });
+  log("Click points to draw the delete area, then click the first point again to finish.", "info");
+});
+
+function handleDeleteArea(areaLayer) {
+  const areaGeoJSON = areaLayer.toGeoJSON();
+  areaLayer.remove(); // this shape is just a selection tool, never part of the data
+
+  const scope = document.getElementById("delete-scope").value;
+  const toRemove = [];
+  editLayer.eachLayer((lyr) => {
+    if (!lyr.feature) return;
+    if (scope !== "__all__" && lyr._sourceKey !== scope) return;
+    try {
+      if (turf.booleanIntersects(lyr.toGeoJSON(), areaGeoJSON)) toRemove.push(lyr);
+    } catch (err) {
+      // a handful of geometry edge cases turf can't evaluate — skip them rather than fail the whole batch
+    }
+  });
+
+  toRemove.forEach((lyr) => {
+    if (lyr === selectedLayer) selectFeature(null);
+    editLayer.removeLayer(lyr);
+    sourceLayers.forEach((arr) => {
+      const idx = arr.indexOf(lyr);
+      if (idx !== -1) arr.splice(idx, 1);
+    });
+  });
+
+  updateBadge();
+  renderLayersPanel();
+  log(`Deleted ${toRemove.length} feature(s) inside the drawn area.`, toRemove.length ? "ok" : "info");
+}
+
+// ---------------------------------------------------------------------------
+// View JSON modal — shows everything currently loaded, and dims the map
+// behind it while open.
+// ---------------------------------------------------------------------------
+const jsonModalEl = document.getElementById("json-modal");
+document.getElementById("view-json-btn").addEventListener("click", () => {
+  const allLayers = new Set(editLayer.getLayers());
+  sourceLayers.forEach((layers) => layers.forEach((lyr) => allLayers.add(lyr)));
+  const geojson = L.featureGroup([...allLayers]).toGeoJSON();
+  document.getElementById("json-modal-content").textContent = JSON.stringify(geojson, null, 2);
+  jsonModalEl.classList.add("open");
+});
+document.getElementById("json-modal-close").addEventListener("click", () => jsonModalEl.classList.remove("open"));
+jsonModalEl.querySelector(".json-modal-backdrop").addEventListener("click", () => jsonModalEl.classList.remove("open"));
+
 document.getElementById("clear-all-btn").addEventListener("click", () => {
   editLayer.clearLayers();
   fileSources.clear();
@@ -286,6 +353,12 @@ document.getElementById("clear-all-btn").addEventListener("click", () => {
 
 // New shapes drawn with the toolbar
 map.on("pm:create", (e) => {
+  if (deleteAreaPending && e.shape === "Polygon") {
+    deleteAreaPending = false;
+    handleDeleteArea(e.layer);
+    return;
+  }
+
   let layer = e.layer;
 
   // Match newly-drawn shapes to the same styling used for loaded data
@@ -371,6 +444,17 @@ function setSourceOpacity(subKey, opacityPct) {
   if (!info) return;
   info.opacity = opacityPct;
   updateFocusVisuals(); // re-applies effectiveStyle() to every visible layer
+}
+
+// Recolors every feature currently in one overlay layer at once.
+function recolorSubLayer(subKey, color) {
+  const info = sourcesInfo.get(subKey);
+  if (!info) return;
+  info.color = color;
+  (sourceLayers.get(subKey) || []).forEach((lyr) => {
+    lyr._baseStyle = { ...lyr._baseStyle, color, fillColor: color };
+  });
+  updateFocusVisuals();
 }
 
 // Removes every overlay layer belonging to one file (used both when the
@@ -506,7 +590,7 @@ function renderLayersPanel() {
         const row = document.createElement("div");
         row.className = "layer-row" + (info.visible ? "" : " layer-hidden");
         row.innerHTML = `
-          <span class="layer-swatch" style="background:${info.color}"></span>
+          <input type="color" class="layer-swatch" value="${info.color}" title="Recolor this layer" />
           <span class="layer-main">
             <span class="layer-name">${escapeHtml(src.groupProperty ? info.groupValue : "All features")}</span>
             <span class="layer-count">${count} feature${count === 1 ? "" : "s"}</span>
@@ -516,6 +600,9 @@ function renderLayersPanel() {
           </label>
           <input type="range" class="layer-opacity" min="10" max="100" value="${info.opacity}" title="Layer opacity" />`;
 
+        row.querySelector(".layer-swatch").addEventListener("input", (e) => {
+          recolorSubLayer(subKey, e.target.value);
+        });
         row.querySelector(".layer-vis-toggle input").addEventListener("change", (e) => {
           setSourceVisibility(subKey, e.target.checked);
           row.classList.toggle("layer-hidden", !e.target.checked);
@@ -529,6 +616,20 @@ function renderLayersPanel() {
 
     layersPanelEl.appendChild(group);
   });
+
+  renderDeleteScopeOptions();
+}
+
+// Keeps the "Delete within an area" scope dropdown in sync with whatever
+// overlay layers currently exist, preserving the current selection when
+// possible.
+function renderDeleteScopeOptions() {
+  const select = document.getElementById("delete-scope");
+  const prevValue = select.value;
+  const options = [{ value: "__all__", text: "All loaded layers" }];
+  sourcesInfo.forEach((info, subKey) => options.push({ value: subKey, text: info.label }));
+  select.innerHTML = options.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.text)}</option>`).join("");
+  select.value = options.some((o) => o.value === prevValue) ? prevValue : "__all__";
 }
 
 // Keep the export filename in sync with what's loaded, but only while the
@@ -676,8 +777,25 @@ function renderPropsPanel(layer) {
     propsPanelEl.innerHTML = `<div class="props-empty">Click a feature on the map to edit its properties.</div>`;
     return;
   }
-  const props = layer.feature.properties || {};
   propsPanelEl.innerHTML = "";
+
+  // Per-feature color override — works for a loaded feature or a hand-drawn
+  // shape alike, independent of whatever layer/group color it started with.
+  const styleRow = document.createElement("div");
+  styleRow.className = "props-style-row";
+  const colorInput = document.createElement("input");
+  colorInput.type = "color";
+  colorInput.value = (layer._baseStyle && layer._baseStyle.color) || "#2a4b9b";
+  colorInput.title = "Recolor just this feature";
+  colorInput.addEventListener("input", () => {
+    layer._baseStyle = { ...layer._baseStyle, color: colorInput.value, fillColor: colorInput.value };
+    updateFocusVisuals(); // re-applies the right style, including the focus highlight if active
+  });
+  styleRow.appendChild(document.createTextNode("Color "));
+  styleRow.appendChild(colorInput);
+  propsPanelEl.appendChild(styleRow);
+
+  const props = layer.feature.properties || {};
 
   const entries = Object.entries(props);
   if (entries.length === 0) {
