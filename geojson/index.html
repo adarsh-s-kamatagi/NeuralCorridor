@@ -12,6 +12,7 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.18.3/dist/leaflet-geoman.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 </head>
 <body class="editor-body">
 
@@ -24,6 +25,7 @@
       <div id="current-file-badge">No file loaded yet.</div>
       <div class="topbar-actions">
         <button id="fit-all-btn" class="run-btn secondary">Fit to data</button>
+        <button id="view-json-btn" class="run-btn secondary">View JSON</button>
         <button id="clear-all-btn" class="run-btn secondary">Clear all</button>
       </div>
     </header>
@@ -53,9 +55,16 @@
         </div>
 
         <h2>Layers</h2>
-        <p class="hint">Each loaded file is auto-split into overlay layers by whatever property looks like a category (or by geometry type) — pick a different "Split by" field per file, and toggle/fade/remove each resulting layer.</p>
+        <p class="hint">Each loaded file is auto-split into overlay layers by whatever property looks like a category (or by geometry type) — pick a different "Split by" field per file, and toggle/fade/remove each resulting layer. Click a layer's color swatch to recolor it.</p>
         <div class="layers-panel" id="layers-panel">
           <div class="layers-empty">Nothing loaded yet — check a file above or upload one.</div>
+        </div>
+
+        <h2>Delete within an area</h2>
+        <p class="hint">Draw a free-form shape on the map; every feature inside it (from the chosen scope) gets deleted.</p>
+        <div class="delete-tool-row">
+          <select id="delete-scope"><option value="__all__">All loaded layers</option></select>
+          <button id="delete-area-btn" class="run-btn secondary">Draw delete area</button>
         </div>
 
         <h2>Selected feature</h2>
@@ -81,6 +90,17 @@
       <main class="map-pane">
         <div id="map"></div>
         <p class="map-hint">Draw toolbar top-left — add/edit/drag/delete shapes. Click a feature to edit its properties on the left.</p>
+
+        <div id="json-modal" class="json-modal">
+          <div class="json-modal-backdrop"></div>
+          <div class="json-modal-panel">
+            <div class="json-modal-header">
+              <span>Full GeoJSON (everything currently loaded)</span>
+              <button id="json-modal-close" class="run-btn secondary">Close</button>
+            </div>
+            <pre id="json-modal-content"></pre>
+          </div>
+        </div>
       </main>
     </div>
   </div>
