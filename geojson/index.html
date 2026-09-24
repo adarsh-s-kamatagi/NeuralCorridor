@@ -32,7 +32,7 @@
 
     <div class="main-row">
       <!-- LEFT: everything except the map — scrollable -->
-      <aside class="side-panel">
+      <aside class="side-panel" id="side-panel">
 
         <h2>Load a file</h2>
         <div class="source-tabs">
@@ -86,6 +86,8 @@
         <div id="log">Ready.</div>
       </aside>
 
+      <div class="panel-resize-handle" id="panel-resize-handle" title="Drag to resize — double-click to reset"></div>
+
       <!-- RIGHT: the map — 80% width, fixed to its pane, never scrolls -->
       <main class="map-pane">
         <div id="map"></div>
@@ -95,10 +97,14 @@
           <div class="json-modal-backdrop"></div>
           <div class="json-modal-panel">
             <div class="json-modal-header">
-              <span>Full GeoJSON (everything currently loaded)</span>
-              <button id="json-modal-close" class="run-btn secondary">Close</button>
+              <span>Full GeoJSON (everything currently loaded) — edit it directly, then Apply</span>
+              <div class="json-modal-actions">
+                <button id="json-modal-apply" class="run-btn">Apply to map</button>
+                <button id="json-modal-close" class="run-btn secondary">Close</button>
+              </div>
             </div>
-            <pre id="json-modal-content"></pre>
+            <textarea id="json-modal-content" spellcheck="false"></textarea>
+            <div id="json-modal-error" class="json-modal-error"></div>
           </div>
         </div>
       </main>
