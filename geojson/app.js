@@ -221,10 +221,36 @@ document.getElementById("focus-toggle").addEventListener("change", (e) => {
 function bindFeatureInteractions(layer) {
   if (!layer.feature) layer.feature = { type: "Feature", properties: {} };
   if (!layer.feature.properties) layer.feature.properties = {};
+
+  // Function content (not a fixed string) so the popup always reflects the
+  // latest properties, even after they've been edited in the side panel.
+  layer.bindPopup(() => buildPopupHtml(layer), { maxWidth: 260, className: "feature-popup-wrap" });
+
   layer.on("click", (e) => {
     L.DomEvent.stop(e); // don't let it bubble to the map's own click (deselect) handler
     selectFeature(layer);
+    layer.openPopup(e.latlng);
   });
+}
+
+function buildPopupHtml(layer) {
+  const props = (layer.feature && layer.feature.properties) || {};
+  const geomType = layer.feature && layer.feature.geometry && layer.feature.geometry.type;
+  const entries = Object.entries(props);
+
+  let html = `<div class="feature-popup">`;
+  if (geomType) html += `<div class="feature-popup-type">${escapeHtml(geomType)}</div>`;
+  if (entries.length === 0) {
+    html += `<div class="feature-popup-empty">No properties</div>`;
+  } else {
+    html += `<div class="feature-popup-scroll"><table class="feature-popup-table">`;
+    entries.forEach(([k, v]) => {
+      html += `<tr><th>${escapeHtml(k)}</th><td>${escapeHtml(v === "" || v == null ? "—" : String(v))}</td></tr>`;
+    });
+    html += `</table></div>`;
+  }
+  html += `</div>`;
+  return html;
 }
 
 function selectFeature(layer) {
